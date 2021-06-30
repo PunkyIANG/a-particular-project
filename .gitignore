@@ -1,5 +1,3 @@
-# ignore git config as it will be differ across clients
-.gitconfig
 
 # unity generated folders
 library/
