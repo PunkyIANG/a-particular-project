@@ -13,6 +13,5 @@ Setup Instructions
 - Enable the `post-merge` and `pre-commit` git hooks, by hitting `Project Setup -> Initialize git hooks`. It will copy the files from `git_hooks` into your local `.git/hooks`.
 The hooks will ensure meta files stay in sync and will alert you if you attempt to commit a >100mb file, which github will reject. It will reject the commit, allowing you to revise it to remove or reduce the size of the offending file(s). **These scripts have to be enabled individually on each computer you clone the repo to. Please ensure your teammates have enabled these as well.**
 
-
 Other docs
 - If shit hits the fan with git: https://github.com/NYUGameCenter/Unity-Git-Config
