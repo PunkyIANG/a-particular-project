@@ -1,5 +1,10 @@
-# ignore git config as it will be differ across clients
-.gitconfig
+# VSCode
+# https://stackoverflow.com/a/57749909/9731532
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
 # unity generated folders
 library/
