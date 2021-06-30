@@ -137,12 +137,17 @@ done
 
 # iterate over directories and check if there is an entry for the appropriate meta file
 for i in $diff_output_dirs; do 
-	# meta file entries are often without directory, so strip the path
-	dir_name=`echo $i | egrep -o "/[^/]+$" | cut -d / -f 2`
-	echo $dir_name
-	has_meta_ignore=$((`echo $diff_output_metas | grep -- "$dir_name.meta" | wc -l`))
-	if [ ${has_meta_ignore} -eq 0 ]; then
-		echo "$dir_name found in .gitignore but not the corresponding meta file! Please add ${dir_name}.meta to .gitignore"
-		exit 1
+	if [ -e "$i" ]; then
+		# meta file entries are often without directory, so strip the path
+		dir_name=`echo $i | egrep -o "/[^/]+$" | cut -d / -f 2`
+
+		if [ -z "$dir_name" ]; then
+			echo $dir_name
+			has_meta_ignore=$((`echo $diff_output_metas | grep -- "$dir_name.meta" | wc -l`))
+			if [ ${has_meta_ignore} -eq 0 ]; then
+				echo "$dir_name found in .gitignore but not the corresponding meta file! Please add ${dir_name}.meta to .gitignore"
+				exit 1
+			fi
+		fi
 	fi
 done
