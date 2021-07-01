@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "unity": "2020.2",
   "unityRelease": "12f1",
-  "description": "This is a template package, used as a basis to build a bigger one.",
+  "description": "The keg code generator package",
   "category": "Tool",
   "type": "tool",
   "license": "MIT",
