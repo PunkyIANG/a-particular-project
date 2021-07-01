@@ -1,5 +1,13 @@
 {
   "dependencies": {
+    "botan.keg": {
+      "version": "file:Keg",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.ext.nunit": "1.0.0"
+      }
+    },
     "com.unity.2d.animation": {
       "version": "5.0.5",
       "depth": 0,
