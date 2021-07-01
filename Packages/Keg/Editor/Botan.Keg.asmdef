@@ -1,0 +1,16 @@
+{
+    "name": "Botan.Keg.Editor",
+    "references": [
+        "Botan.Keg"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}

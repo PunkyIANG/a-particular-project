@@ -1,0 +1,24 @@
+{
+  "name": "com.someproject.keg",
+  "displayName": "The Keg code generator",
+  "version": "1.0.0",
+  "unity": "2020.2",
+  "unityRelease": "12f1",
+  "description": "This is a template package, used as a basis to build a bigger one.",
+  "category": "Tool",
+  "type": "tool",
+  "license": "MIT",
+  "dependencies": {
+    "com.unity.ext.nunit": "1.0.0"
+  },
+  "keywords": [
+    "Code Generation"
+  ],
+  "samples": [
+    {
+      "displayName": "Example 1",
+      "description": "This sample is just an example",
+      "path": "Samples~/Example1"
+    }
+  ]
+}
