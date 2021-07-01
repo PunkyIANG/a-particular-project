@@ -28,16 +28,17 @@ namespace SomeProject.EditorExtensions
         private static void InitializeGitHooks()
         {
             var projectPath               = Path.GetDirectoryName(Application.dataPath);
-            var gitHooksSourceControlPath = Path.Combine(projectPath, "git_hooks");
-            var gitHooksDotGitPath        = Path.Combine(projectPath, ".git", "hooks");
+            var projectRootPath           = Path.GetDirectoryName(projectPath);
+            var gitHooksSourceControlPath = Path.Combine(projectRootPath, "git_hooks");
+            var gitHooksDotGitPath        = Path.Combine(projectRootPath, ".git", "hooks");
 
             foreach (var hookFilePath in Directory.GetFiles(gitHooksSourceControlPath))
             {
                 var fileName = Path.GetFileName(hookFilePath);
                 var hookFileDestinationPath = Path.Combine(gitHooksDotGitPath, fileName);
 
-                Debug.Log($"Copying {hookFilePath} to {hookFileDestinationPath}");
                 File.Copy(hookFilePath, hookFileDestinationPath, overwrite: true);
+                Debug.Log($"Copied {hookFilePath} to {hookFileDestinationPath}");
             }
         }
     }
