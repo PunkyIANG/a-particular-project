@@ -13,5 +13,5 @@
 - Install all the aforementioned programs.
 - Clone this repo via github: `Add -> Clone repository -> URL -> https://github.com/PunkyIANG/a-particular-project`
 - Find the path to the Unity Editor. For me it is `C:\Program Files\Unity\Editor`, for you it might be nested in a folder with the version name. Go to envioronment variables, and add a new variable `UNITY_EDITOR`, setting it to this path.
-- Run the python script at the root of repository, by doing `python setup.py fresh` in the console. It will build Kari and enable the `post-merge` and `pre-commit` git hooks.
+- Run the python script at the root of the repository, by doing `pip install -r requirements.txt` and then `python setup.py fresh` in the console. It will build Kari and enable the `post-merge` and `pre-commit` git hooks.
 The hooks will ensure meta files stay in sync and will alert you if you attempt to commit a >100mb file, which github will reject. It will reject the commit, allowing you to revise it to remove or reduce the size of the offending file(s). **These scripts have to be enabled individually on each computer you clone the repo to. Please ensure your teammates have enabled these as well.**
