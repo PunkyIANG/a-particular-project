@@ -29,11 +29,13 @@ SAVEIFS=$IFS
 IFS="
 "
 for file in $COMMIT_TEXT; do
-	file_size=$(du -m $CURRENT_DIR/$file | awk '{print $1}')
-	if [ "$file_size" -ge 100 ]; then
-		echo "$file is over 100MB."
-		HAS_ERROR="1"
-	fi
+    if [ -e "$file" ]; then
+        file_size=$(du -m $CURRENT_DIR/$file | awk '{print $1}')
+        if [ "$file_size" -ge 100 ]; then
+            echo "$file is over 100MB."
+            HAS_ERROR="1"
+        fi
+    fi
 done
 IFS=$SAVEIFS
 
@@ -139,13 +141,14 @@ done
 for i in $diff_output_dirs; do 
 	# check if the file/directory exists
 	if [ -e "$i" ]; then
-		# meta file entries are often without directory, so strip the path
-		dir_name=`echo $i | egrep -o "/[^/]+$" | cut -d / -f 2`
-
-		has_meta_ignore=$((`echo $diff_output_metas | grep -- "$dir_name.meta" | wc -l`))
-		if [ ${has_meta_ignore} -eq 0 ]; then
-			echo "$dir_name found in .gitignore but not the corresponding meta file! Please add ${dir_name}.meta to .gitignore"
-			exit 1
+        if [ "$i" == *$ASSETS_DIR* ]; then
+            # meta file entries are often without directory, so strip the path
+            dir_name=`echo $i | egrep -o "/[^/]+$" | cut -d / -f 2`
+            has_meta_ignore=$((`echo $diff_output_metas | grep -- "$dir_name.meta" | wc -l`))
+            if [ ${has_meta_ignore} -eq 0 ]; then
+                echo "$dir_name found in .gitignore but not the corresponding meta file! Please add ${dir_name}.meta to .gitignore"
+                exit 1
+            fi
 		fi
 	fi
 done
