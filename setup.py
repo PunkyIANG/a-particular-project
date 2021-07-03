@@ -8,7 +8,9 @@ MSBUILD_INTERMEDIATE_OUTPUT_PATH = ""
 MSBUILD_OUTPUT_PATH = ""
 CUSTOM_LOCAL_FEED = ""
 GIT_SOURCE_HOOKS_PATH = ""
+MSBUILD_DOT_NUGET = ""
 DOT_GIT_HOOKS_PATH = ""
+UNITY_NUGET_PACKAGES_PATH = ""
 
 def set_global(name, value):
     globals()[name] = value
@@ -16,14 +18,18 @@ def set_global(name, value):
 
 @click.group()
 @click.option("-build_directory", envvar="BUILD_DIRECTORY", default=os.path.abspath("Build"))
+@click.option("-local_feed_directory", envvar="CUSTOM_LOCAL_FEED", default=os.path.abspath("NuGet_Packages"))
+@click.option("-unity_nuget_packages", default=os.path.abspath("Game/Assets/Packages"))
 # @click.option("-MSBUILD_INTERMEDIATE_OUTPUT_PATH", default=os.path.abspath("Build/obj"))
 # @click.option("-MSBUILD_OUTPUT_PATH", default=os.path.abspath("Build/bin"))
 # @click.option("-CUSTOM_LOCAL_FEED", default=os.path.abspath("Build/bin/Packages"))
-def main(build_directory):
+def main(build_directory, local_feed_directory, unity_nuget_packages):
     """Prepares environment and global variables"""
     set_global("MSBUILD_INTERMEDIATE_OUTPUT_PATH", os.path.join(build_directory, "obj"))
     set_global("MSBUILD_OUTPUT_PATH", os.path.join(build_directory, "bin"))
-    set_global("CUSTOM_LOCAL_FEED", os.path.join(MSBUILD_OUTPUT_PATH, "Packages"))
+    set_global("MSBUILD_DOT_NUGET", os.path.join(build_directory, ".nuget"))
+    set_global("CUSTOM_LOCAL_FEED", local_feed_directory)
+    set_global("UNITY_NUGET_PACKAGES_PATH", unity_nuget_packages)
     set_global("GIT_SOURCE_HOOKS_PATH", os.path.abspath("git_hooks"))
     set_global("DOT_GIT_HOOKS_PATH", os.path.abspath(".git/hooks"))
 
@@ -65,6 +71,11 @@ def build_kari(clean):
         
         # TODO: actually test if it works
         run_sync("dotnet run -p Kari.Test")
+
+        for p in nuget_projects:
+            dest_dir   = os.path.join(UNITY_NUGET_PACKAGES_PATH, p)
+            source_dir = os.path.join(MSBUILD_DOT_NUGET, p)
+            copy_tree_if_modified(dest_dir, source_dir)
 
     except subprocess.CalledProcessError as err:
         print(f'Build process exited with error code {err.returncode}')

@@ -11,6 +11,7 @@ Sandbox/*
 
 # Kari builds to a directory in root by default 
 Build/*
+NuGet_Packages/*
 
 # Ignore Jetbrains Plugin
 Assets/Plugins/Editor/JetBrains.meta
