@@ -9,6 +9,9 @@
 # Sandbox for personal trashground
 Sandbox/*
 
+# Kari builds to a directory in root by default 
+Build/*
+
 # Ignore Jetbrains Plugin
 Assets/Plugins/Editor/JetBrains.meta
 Assets/Plugins/Editor/JetBrains/*

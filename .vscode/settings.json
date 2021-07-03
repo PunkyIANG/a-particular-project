@@ -42,14 +42,14 @@
         "**/*.meta":true,
         "**/*.prefab":true,
         "**/*.unity":true,
-        "build/":true,
-        "Build/":true,
-        "Library/":true,
-        "library/":true,
-        "obj/":true,
-        "Obj/":true,
-        "ProjectSettings/":true,
-        "temp/":true,
-        "Temp/":true
+        "Assets/build/":true,
+        "Assets/Build/":true,
+        "Assets/Library/":true,
+        "Assets/library/":true,
+        "Assets/obj/":true,
+        "Assets/Obj/":true,
+        "Assets/ProjectSettings/":true,
+        "Assets/temp/":true,
+        "Assets/Temp/":true
     }
 }
