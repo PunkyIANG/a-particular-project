@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace SomeProject.EditorExtensions
 {
