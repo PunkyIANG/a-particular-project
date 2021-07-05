@@ -6,11 +6,10 @@ import subprocess
 
 MSBUILD_INTERMEDIATE_OUTPUT_PATH = ""
 MSBUILD_OUTPUT_PATH = ""
-CUSTOM_LOCAL_FEED = ""
 GIT_SOURCE_HOOKS_PATH = ""
-MSBUILD_DOT_NUGET = ""
 DOT_GIT_HOOKS_PATH = ""
-UNITY_NUGET_PACKAGES_PATH = ""
+KARI_GENERATOR_PATH = ""
+PROJECT_DIRECTORY = ""
 
 def set_global(name, value):
     globals()[name] = value
@@ -18,70 +17,105 @@ def set_global(name, value):
 
 @click.group()
 @click.option("-build_directory", envvar="BUILD_DIRECTORY", default=os.path.abspath("Build"))
-@click.option("-local_feed_directory", envvar="CUSTOM_LOCAL_FEED", default=os.path.abspath("NuGet_Packages"))
-@click.option("-unity_nuget_packages", default=os.path.abspath("Game/Assets/Packages"))
-# @click.option("-MSBUILD_INTERMEDIATE_OUTPUT_PATH", default=os.path.abspath("Build/obj"))
-# @click.option("-MSBUILD_OUTPUT_PATH", default=os.path.abspath("Build/bin"))
-# @click.option("-CUSTOM_LOCAL_FEED", default=os.path.abspath("Build/bin/Packages"))
-def main(build_directory, local_feed_directory, unity_nuget_packages):
+@click.option("-project_directory", envvar="PROJECT_DIRECTORY", default=os.path.abspath("."))
+def main(build_directory, project_directory):
     """Prepares environment and global variables"""
     set_global("MSBUILD_INTERMEDIATE_OUTPUT_PATH", os.path.join(build_directory, "obj"))
     set_global("MSBUILD_OUTPUT_PATH", os.path.join(build_directory, "bin"))
-    set_global("MSBUILD_DOT_NUGET", os.path.join(build_directory, ".nuget"))
-    set_global("CUSTOM_LOCAL_FEED", local_feed_directory)
-    set_global("UNITY_NUGET_PACKAGES_PATH", unity_nuget_packages)
-    set_global("GIT_SOURCE_HOOKS_PATH", os.path.abspath("git_hooks"))
-    set_global("DOT_GIT_HOOKS_PATH", os.path.abspath(".git/hooks"))
+    set_global("PROJECT_DIRECTORY", project_directory)
+    set_global("GIT_SOURCE_HOOKS_PATH", os.path.join(project_directory, "git_hooks"))
+    set_global("DOT_GIT_HOOKS_PATH", os.path.join(project_directory, ".git/hooks"))
+    set_global("KARI_GENERATOR_PATH", f"{MSBUILD_OUTPUT_PATH}/Kari.Generator/Release/net5.0/kari.dll")
 
 
-@main.command('fresh')
-def fresh():
-    """Does a clean build"""
+@main.command("setup")
+def setup():
+    """Does the setup and the initial build"""
     copy_hooks.callback()
     build_kari.callback(clean=True)
 
 
-@main.command('hooks')
+@main.command("hooks")
 def copy_hooks():
     """Copies github hooks from git_hooks"""
     copy_all_files(GIT_SOURCE_HOOKS_PATH, DOT_GIT_HOOKS_PATH)
     print("Copied github hooks")
 
 
-@main.command('kari')
-@click.option('-clean', is_flag=True)
+@main.group("kari")
+def kari():
+    """Has to do with code generation"""
+    pass
+
+@kari.command("compile")
+@click.option("-clean", is_flag=True)
 def build_kari(clean):
     """Builds the Kari code generator"""
     # Clear all previous output
-    if clean:
-        try_delete(MSBUILD_INTERMEDIATE_OUTPUT_PATH)
-        try_delete(MSBUILD_OUTPUT_PATH)
+    if clean: nuke_kari.callback()
     
-    # A list of projects to be compiled into nuget packages
-    # By convention, also their assembly names
-    nuget_projects = ["Kari.Generators", "Kari.Shared", "Kari"]
+    os.chdir("Kari")
 
     try:
-        os.chdir("Kari")
-        try_make_dir(CUSTOM_LOCAL_FEED)
-
-        # Invoke nuget packing commands
-        for p in nuget_projects:
-            run_sync(f'dotnet pack {p}')
+        run_sync("dotnet restore")
+        run_sync("dotnet publish Kari.Generator/Kari.Generator.csproj --configuration Release --no-self-contained")
         
-        # TODO: actually test if it works
-        run_sync("dotnet run -p Kari.Test")
-
-        for p in nuget_projects:
-            dest_dir   = os.path.join(UNITY_NUGET_PACKAGES_PATH, p)
-            source_dir = os.path.join(MSBUILD_DOT_NUGET, p)
-            copy_tree_if_modified(dest_dir, source_dir)
+        print(f"The final dll has been written to {KARI_GENERATOR_PATH}")
+        print("To run it, do `cli kari run`, passing in the flags`")
+        # TODO: actually run tests
+        # run_sync("dotnet run -p Kari.Test")
 
     except subprocess.CalledProcessError as err:
-        print(f'Build process exited with error code {err.returncode}')
+        print(f"Build process exited with error code {err.returncode}")
+        return False
 
     finally:
         os.chdir("..")
+    
+    return True
+
+class KariHelp(click.Group):
+    def format_help(self, ctx, f):
+        if os.path.exists(KARI_GENERATOR_PATH):
+            # This displays the help message by default
+            run_sync(f"dotnet {KARI_GENERATOR_PATH}")
+        else:
+            print("do `kari compile` first")
+
+@kari.command(name="run", cls=KariHelp, context_settings={
+  "ignore_unknown_options": True
+})
+@click.argument("unprocessed_args", nargs=-1, type=click.UNPROCESSED)
+def generate_with_kari(unprocessed_args):
+    """Equivalent to calling Kari from the command line"""
+    if not os.path.exists(KARI_GENERATOR_PATH):
+        print("Initiating build, since Kari has not been built")
+        if not build_kari.callback(clean=False):
+            return False
+    
+    try:
+        # Pass along all of the unparsed commands
+        command = ["dotnet", KARI_GENERATOR_PATH]
+        command.extend(unprocessed_args)
+        run_sync(" ".join(command))
+
+    except subprocess.CalledProcessError as err:
+        print(f"Generation failed with error code {err.returncode}")
+        return False
+    
+    return True
+
+
+@kari.command("unity")
+def generate_for_unity():
+    """Generates code for the unity project (unimplemented)"""
+    pass
+
+@kari.command("nuke")
+def nuke_kari():
+    """Nukes the build output"""
+    try_delete(MSBUILD_INTERMEDIATE_OUTPUT_PATH)
+    try_delete(MSBUILD_OUTPUT_PATH)
 
 
 def copy_tree_if_modified(dest_dir, source_dir):
@@ -143,5 +177,5 @@ def try_make_dir(path):
     os.makedirs(path, exist_ok = True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
