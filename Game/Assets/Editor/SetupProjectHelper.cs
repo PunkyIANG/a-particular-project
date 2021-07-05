@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
-
+using static SomeProject.EditorExtensions.Paths;
 namespace SomeProject.EditorExtensions
 {
     [InitializeOnLoad]
@@ -27,10 +27,8 @@ namespace SomeProject.EditorExtensions
         [MenuItem("Project Setup/Initialize git hooks")]
         private static void InitializeGitHooks()
         {
-            var projectPath               = Path.GetDirectoryName(Application.dataPath);
-            var projectRootPath           = Path.GetDirectoryName(projectPath);
-            var gitHooksSourceControlPath = Path.Combine(projectRootPath, "git_hooks");
-            var gitHooksDotGitPath        = Path.Combine(projectRootPath, ".git", "hooks");
+            var gitHooksSourceControlPath = Path.Combine(ProjectRootPath, "git_hooks");
+            var gitHooksDotGitPath        = Path.Combine(ProjectRootPath, ".git", "hooks");
 
             foreach (var hookFilePath in Directory.GetFiles(gitHooksSourceControlPath))
             {

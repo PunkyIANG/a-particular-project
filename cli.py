@@ -54,7 +54,8 @@ def build_kari(clean):
     # Clear all previous output
     if clean: nuke_kari.callback()
     
-    os.chdir("Kari")
+    current_directory = os.curdir
+    os.chdir(f"{PROJECT_DIRECTORY}/Kari")
 
     try:
         # run_sync("dotnet restore")
@@ -70,7 +71,7 @@ def build_kari(clean):
         return False
 
     finally:
-        os.chdir("..")
+        os.chdir(current_directory)
     
     return True
 
@@ -80,7 +81,7 @@ def build_kari(clean):
 })
 @click.option("-rebuild", is_flag=True)
 @click.argument("unprocessed_args", nargs=-1, type=click.UNPROCESSED)
-def generate_with_kari(unprocessed_args, rebuild):
+def generate_with_kari(rebuild, unprocessed_args):
     """Equivalent to calling Kari from the command line"""
 
     if rebuild:
@@ -107,8 +108,11 @@ def generate_with_kari(unprocessed_args, rebuild):
 
 @kari.command("unity")
 def generate_for_unity():
-    """Generates code for the unity project (unimplemented)"""
-    pass
+    """Generates code for the unity project """
+
+    # TODO: maybe generate in a single file to minimize .meta's, which is possible
+    return generate_with_kari.callback(False, 
+        ["-input", PROJECT_DIRECTORY + "/Game/Assets", "-output",PROJECT_DIRECTORY + "/Game/Assets/Generated"])
 
 @kari.command("nuke")
 def nuke_kari():

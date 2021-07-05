@@ -8,8 +8,12 @@
 
 # For now, ignore the entire generated folder.
 # Now, it would be logical to generate all into a single file just to have less .meta's
-Generated
-Generated.meta
+Assets/Generated
+Assets/Generated.meta
+
+# Per-user custom settings assets
+Assets/Settings/Editor/User
+Assets/Settings/Editor/User.meta
 
 # unity generated folders
 library/
