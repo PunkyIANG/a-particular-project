@@ -6,6 +6,11 @@
 *.csproj
 *.sln
 
+# For now, ignore the entire generated folder.
+# Now, it would be logical to generate all into a single file just to have less .meta's
+Generated
+Generated.meta
+
 # unity generated folders
 library/
 temp/
