@@ -57,7 +57,7 @@ def build_kari(clean):
     os.chdir("Kari")
 
     try:
-        run_sync("dotnet restore")
+        # run_sync("dotnet restore")
         run_sync("dotnet publish Kari.Generator/Kari.Generator.csproj --configuration Release --no-self-contained")
         
         print(f"The final dll has been written to {KARI_GENERATOR_PATH}")
@@ -74,21 +74,20 @@ def build_kari(clean):
     
     return True
 
-class KariHelp(click.Group):
-    def format_help(self, ctx, f):
-        if os.path.exists(KARI_GENERATOR_PATH):
-            # This displays the help message by default
-            run_sync(f"dotnet {KARI_GENERATOR_PATH}")
-        else:
-            print("do `kari compile` first")
 
-@kari.command(name="run", cls=KariHelp, context_settings={
+@kari.command(name="run", context_settings={
   "ignore_unknown_options": True
 })
+@click.option("-rebuild", is_flag=True)
 @click.argument("unprocessed_args", nargs=-1, type=click.UNPROCESSED)
-def generate_with_kari(unprocessed_args):
+def generate_with_kari(unprocessed_args, rebuild):
     """Equivalent to calling Kari from the command line"""
-    if not os.path.exists(KARI_GENERATOR_PATH):
+
+    if rebuild:
+        if not build_kari.callback(clean=False):
+            return False
+
+    elif not os.path.exists(KARI_GENERATOR_PATH):
         print("Initiating build, since Kari has not been built")
         if not build_kari.callback(clean=False):
             return False
