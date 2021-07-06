@@ -4,30 +4,37 @@ import shutil
 import os
 import subprocess
 from registry_hijacking import set_env, get_env
+import github_hooks
 
-MSBUILD_INTERMEDIATE_OUTPUT_PATH = ""
-MSBUILD_OUTPUT_PATH = ""
-GIT_SOURCE_HOOKS_PATH = ""
-DOT_GIT_HOOKS_PATH = ""
-KARI_GENERATOR_PATH = ""
-PROJECT_DIRECTORY = ""
+MSBUILD_INTERMEDIATE_OUTPUT_PATH = None
+MSBUILD_OUTPUT_PATH = None       # Build/bin
+GIT_SOURCE_HOOKS_PATH = None     # /git_hooks
+DOT_GIT_HOOKS_PATH = None        # /.git/hooks
+KARI_GENERATOR_PATH = None       # the built dll path
+PROJECT_DIRECTORY = None         # /
+UNITY_PROJECT_DIRECTORY = None   # /Game
+UNITY_ASSETS_DIRECTORY = None    # /Game/Assets
+
+def set_global_and_env(name, value):
+    globals()[name] = value
+    os.environ[name] = value
 
 def set_global(name, value):
     globals()[name] = value
-    os.environ[name] = value
 
 @click.group()
 @click.option("-build_directory", envvar="BUILD_DIRECTORY", default=os.path.abspath("Build"))
 @click.option("-project_directory", envvar="PROJECT_DIRECTORY", default=os.path.abspath("."))
 def cli(build_directory, project_directory):
     """Prepares environment and global variables"""
-    set_global("MSBUILD_INTERMEDIATE_OUTPUT_PATH", os.path.join(build_directory, "obj"))
-    set_global("MSBUILD_OUTPUT_PATH", os.path.join(build_directory, "bin"))
+    set_global_and_env("MSBUILD_INTERMEDIATE_OUTPUT_PATH", os.path.join(build_directory, "obj"))
+    set_global_and_env("MSBUILD_OUTPUT_PATH", os.path.join(build_directory, "bin"))
     set_global("PROJECT_DIRECTORY", project_directory)
     set_global("GIT_SOURCE_HOOKS_PATH", os.path.join(project_directory, "git_hooks"))
     set_global("DOT_GIT_HOOKS_PATH", os.path.join(project_directory, ".git/hooks"))
     set_global("KARI_GENERATOR_PATH", f"{MSBUILD_OUTPUT_PATH}/Kari.Generator/Release/net5.0/kari.dll")
-
+    set_global("UNITY_PROJECT_DIRECTORY", os.path.join(project_directory, "Game"))
+    set_global("UNITY_ASSETS_DIRECTORY", os.path.join(UNITY_PROJECT_DIRECTORY, "Assets"))
 
 @cli.command("setup")
 @click.option("-skip_unity_editor_envvar")
@@ -93,6 +100,15 @@ def copy_github_hooks():
     """Copies github hooks from git_hooks"""
     copy_all_files(GIT_SOURCE_HOOKS_PATH, DOT_GIT_HOOKS_PATH)
     print("Copied github hooks")
+
+# TODO: 
+# Read docs more carefully to find out how to extend an existing group from other modules.
+# My idea is to have the extensions reference the group, not the other way around. 
+@cli.command("git_precommit")
+def github_pre_commit():
+    """Script called by git before commiting, used to validate the commit"""
+    git_hooks.precommit()
+
 
 
 @cli.group("kari")
@@ -170,7 +186,7 @@ def generate_code_for_unity():
 
     # TODO: maybe generate in a single file to minimize .meta's, which is possible
     return generate_with_kari.callback(False, 
-        ["-input", PROJECT_DIRECTORY + "/Game/Assets", "-output", PROJECT_DIRECTORY + "/Game/Assets/Generated"])
+        ["-input", UNITY_ASSETS_DIRECTORY, "-output", UNITY_ASSETS_DIRECTORY + "/Generated"])
 
 
 @kari.command("nuke")
