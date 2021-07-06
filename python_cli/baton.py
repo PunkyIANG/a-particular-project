@@ -18,7 +18,7 @@ def set_global(name, value):
 @click.group()
 @click.option("-build_directory", envvar="BUILD_DIRECTORY", default=os.path.abspath("Build"))
 @click.option("-project_directory", envvar="PROJECT_DIRECTORY", default=os.path.abspath("."))
-def main(build_directory, project_directory):
+def cli(build_directory, project_directory):
     """Prepares environment and global variables"""
     set_global("MSBUILD_INTERMEDIATE_OUTPUT_PATH", os.path.join(build_directory, "obj"))
     set_global("MSBUILD_OUTPUT_PATH", os.path.join(build_directory, "bin"))
@@ -28,21 +28,21 @@ def main(build_directory, project_directory):
     set_global("KARI_GENERATOR_PATH", f"{MSBUILD_OUTPUT_PATH}/Kari.Generator/Release/net5.0/kari.dll")
 
 
-@main.command("setup")
+@cli.command("setup")
 def setup():
     """Does the setup and the initial build"""
     copy_hooks.callback()
-    build_kari.callback(clean=True)
+    generate_for_unity.callback()
 
 
-@main.command("hooks")
+@cli.command("hooks")
 def copy_hooks():
     """Copies github hooks from git_hooks"""
     copy_all_files(GIT_SOURCE_HOOKS_PATH, DOT_GIT_HOOKS_PATH)
     print("Copied github hooks")
 
 
-@main.group("kari")
+@cli.group("kari")
 def kari():
     """Has to do with code generation"""
     pass
@@ -112,7 +112,7 @@ def generate_for_unity():
 
     # TODO: maybe generate in a single file to minimize .meta's, which is possible
     return generate_with_kari.callback(False, 
-        ["-input", PROJECT_DIRECTORY + "/Game/Assets", "-output",PROJECT_DIRECTORY + "/Game/Assets/Generated"])
+        ["-input", PROJECT_DIRECTORY + "/Game/Assets", "-output", PROJECT_DIRECTORY + "/Game/Assets/Generated"])
 
 @kari.command("nuke")
 def nuke_kari():
@@ -181,4 +181,4 @@ def try_make_dir(path):
 
 
 if __name__ == "__main__":
-    main()
+    cli()
