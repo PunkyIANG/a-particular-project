@@ -3,6 +3,7 @@ import click
 import shutil
 import os
 import subprocess
+from registry_hijacking import set_env, get_env
 
 MSBUILD_INTERMEDIATE_OUTPUT_PATH = ""
 MSBUILD_OUTPUT_PATH = ""
@@ -29,14 +30,66 @@ def cli(build_directory, project_directory):
 
 
 @cli.command("setup")
-def setup():
+@click.option("-skip_unity_editor_envvar")
+def setup(skip_unity_editor_envvar):
     """Does the setup and the initial build"""
-    copy_hooks.callback()
-    generate_for_unity.callback()
+    copy_github_hooks.callback()
+    generate_code_for_unity.callback()
+
+    if not skip_unity_editor_envvar:
+        set_unity_editor_envvar.callback(info=True)
+
+
+@cli.command("update")
+def update_self():
+    """Recompiles and reinstalls Baton globally"""
+    
+    print('Just wait a couple of seconds...')
+    subprocess.Popen(f"pip install {PROJECT_DIRECTORY}/python_cli")
+
+
+@cli.command("set_unity_editor")
+@click.option("-info", is_flag=True, default=False, help="whether to show more information about the UNITY_EDITOR variable")
+def set_unity_editor_envvar(info):
+    """
+    Helps to set the persistent UNITY_EDITOR global variable.
+    This variable needs to be set for the merge tool to work properly.
+    """
+
+    if info:
+        print("UNITY_EDITOR is the path to the folder with the Unity.exe executable. On my machine, this path is C:\\Program Files\\Unity\\Editor. for you it might be nested in a folder with the version name. You may do it via `Unity Hub -> Installs -> Three dots above the required version -> Show in Explorer`. If the needed version is not showing up, you have either failed to install it or installed it separately, in which case you'd have to `Locate` it.")
+
+    current_path = get_env("UNITY_EDITOR")
+    if current_path == "":
+        print("Currently, the variable UNITY_EDITOR has no value.")
+    else:
+        print("The current value of UNITY_EDITOR is: " + current_path)
+    
+    # Here, the user would go into Unity hub and descover the path to the Unity editor
+    input_path = input("Enter the new value (just press Enter to skip): ")
+
+    # If user hits Enter, we get an empty string here
+    if input_path != '':
+        # As far as I know, the registry requires paths to have backslashed.
+        # Now I do not know what form the output of `os.path.abspath` has,
+        # so I'm replacing the slashes here just in case.
+        editor_path = os.path.abspath(input_path).replace('/', '\\')
+
+        # Hopefully this check will save someone a couple of minutes of debugging
+        if not os.path.exists(editor_path):
+            print(f"Warning: the path {editor_path} does not exist in the filesystem")
+        
+        if current_path != editor_path:
+            set_env("UNITY_EDITOR", editor_path)
+            print("UNITY_EDITOR has been set to " + editor_path)
+        else:
+            print("You have entered the same value for the path")
+    else:
+        print("Skipped")
 
 
 @cli.command("hooks")
-def copy_hooks():
+def copy_github_hooks():
     """Copies github hooks from git_hooks"""
     copy_all_files(GIT_SOURCE_HOOKS_PATH, DOT_GIT_HOOKS_PATH)
     print("Copied github hooks")
@@ -47,8 +100,9 @@ def kari():
     """Has to do with code generation"""
     pass
 
+
 @kari.command("compile")
-@click.option("-clean", is_flag=True)
+@click.option("-clean", is_flag=True, help="Whether to nuke all previous output before recompiling")
 def build_kari(clean):
     """Builds the Kari code generator"""
     # Clear all previous output
@@ -79,10 +133,14 @@ def build_kari(clean):
 @kari.command(name="run", context_settings={
   "ignore_unknown_options": True
 })
-@click.option("-rebuild", is_flag=True)
+@click.option("-rebuild", is_flag=True, help="Whether to recompile Kari before generating code.")
 @click.argument("unprocessed_args", nargs=-1, type=click.UNPROCESSED)
 def generate_with_kari(rebuild, unprocessed_args):
-    """Equivalent to calling Kari from the command line"""
+    """
+    Equivalent to calling Kari from the command line
+    
+    "unprocessed_args" are the arguments passed to Kari. Call this command without any arguments for more info."
+    """
 
     if rebuild:
         if not build_kari.callback(clean=False):
@@ -107,12 +165,13 @@ def generate_with_kari(rebuild, unprocessed_args):
 
 
 @kari.command("unity")
-def generate_for_unity():
+def generate_code_for_unity():
     """Generates code for the unity project """
 
     # TODO: maybe generate in a single file to minimize .meta's, which is possible
     return generate_with_kari.callback(False, 
         ["-input", PROJECT_DIRECTORY + "/Game/Assets", "-output", PROJECT_DIRECTORY + "/Game/Assets/Generated"])
+
 
 @kari.command("nuke")
 def nuke_kari():
