@@ -81,6 +81,7 @@ def set_unity_editor_envvar(info):
 
     if not IS_WINDOWS:
         print("This feature is unavailable for non-windows macines")
+        return
 
     current_path = get_env("UNITY_EDITOR")
     if current_path == "":
