@@ -111,6 +111,12 @@ def github_pre_commit():
     exit_code = git_hooks.precommit(PROJECT_DIRECTORY)
     sys.exit(exit_code)
 
+# It may be too slow, this should check the version ideally 
+@cli.command("git_postcheckout")
+def git_post_checkout():
+    copy_github_hooks.callback()
+    update_self.callback()
+
 
 @cli.group("kari")
 def kari():
