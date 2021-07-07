@@ -3,9 +3,20 @@ import click
 import shutil
 import os
 import subprocess
-from registry_hijacking import set_env, get_env
 import git_hooks
 import sys
+
+# Environment variable shenanigans only exist for windows
+import platform
+IS_WINDOWS = platform.system().lower().startswith('win')
+if IS_WINDOWS:
+    from registry_hijacking import set_env, get_env
+    def quote(path : str) -> str:
+        return '"' + path + '"'
+# Assume Linux
+else:
+    def quote(path : str) -> str:
+        return "'" + path + "'"
 
 MSBUILD_INTERMEDIATE_OUTPUT_PATH = None
 MSBUILD_OUTPUT_PATH = None       # Build/bin
@@ -38,7 +49,7 @@ def cli(build_directory, project_directory):
     set_global("UNITY_ASSETS_DIRECTORY", os.path.join(UNITY_PROJECT_DIRECTORY, "Assets"))
 
 @cli.command("setup")
-@click.option("-skip_unity_editor_envvar")
+@click.option("-skip_unity_editor_envvar", is_flag=True, default=False)
 def setup(skip_unity_editor_envvar):
     """Does the setup and the initial build"""
     copy_github_hooks.callback()
@@ -53,19 +64,23 @@ def update_self():
     """Recompiles and reinstalls Baton globally"""
     
     print('Just wait a couple of seconds...')
-    subprocess.Popen(f"pip install {PROJECT_DIRECTORY}/python_cli")
+    subprocess.Popen("pip install " + quote(f"{PROJECT_DIRECTORY}/python_cli"))
 
 
 @cli.command("set_unity_editor")
 @click.option("-info", is_flag=True, default=False, help="whether to show more information about the UNITY_EDITOR variable")
 def set_unity_editor_envvar(info):
     """
-    Helps to set the persistent UNITY_EDITOR global variable.
+    Helps to set the persistent UNITY_EDITOR environment variable.
     This variable needs to be set for the merge tool to work properly.
+    Only works on Windows!
     """
 
     if info:
         print("UNITY_EDITOR is the path to the folder with the Unity.exe executable. On my machine, this path is C:\\Program Files\\Unity\\Editor. for you it might be nested in a folder with the version name. You may do it via `Unity Hub -> Installs -> Three dots above the required version -> Show in Explorer`. If the needed version is not showing up, you have either failed to install it or installed it separately, in which case you'd have to `Locate` it.")
+
+    if not IS_WINDOWS:
+        print("This feature is unavailable for non-windows macines")
 
     current_path = get_env("UNITY_EDITOR")
     if current_path == "":
@@ -140,7 +155,7 @@ def build_kari(clean):
         run_sync("dotnet publish Kari.Generator/Kari.Generator.csproj --configuration Release --no-self-contained")
         
         print(f"The final dll has been written to {KARI_GENERATOR_PATH}")
-        print("To run it, do `cli kari run`, passing in the flags`")
+        print("To run it, do `baton kari run`, passing in the flags`")
         # TODO: actually run tests
         # run_sync("dotnet run -p Kari.Test")
 
@@ -154,9 +169,7 @@ def build_kari(clean):
     return True
 
 
-@kari.command(name="run", context_settings={
-  "ignore_unknown_options": True
-})
+@kari.command(name="run", context_settings={"ignore_unknown_options": True})
 @click.option("-rebuild", is_flag=True, help="Whether to recompile Kari before generating code.")
 @click.argument("unprocessed_args", nargs=-1, type=click.UNPROCESSED)
 def generate_with_kari(rebuild, unprocessed_args):
@@ -177,7 +190,7 @@ def generate_with_kari(rebuild, unprocessed_args):
     
     try:
         # Pass along all of the unparsed commands
-        command = ["dotnet", KARI_GENERATOR_PATH]
+        command = ["dotnet", quote(KARI_GENERATOR_PATH)]
         command.extend(unprocessed_args)
         run_sync(" ".join(command))
 
@@ -194,7 +207,8 @@ def generate_code_for_unity():
 
     # TODO: maybe generate in a single file to minimize .meta's, which is possible
     return generate_with_kari.callback(False, 
-        ["-input", UNITY_ASSETS_DIRECTORY, "-output", UNITY_ASSETS_DIRECTORY + "/Generated"])
+        [ "-input", quote(UNITY_ASSETS_DIRECTORY), 
+          "-output", quote(os.path.join(UNITY_ASSETS_DIRECTORY, "Generated"))])
 
 
 @kari.command("nuke")
