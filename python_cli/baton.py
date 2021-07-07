@@ -4,7 +4,7 @@ import shutil
 import os
 import subprocess
 from registry_hijacking import set_env, get_env
-import github_hooks
+import git_hooks
 
 MSBUILD_INTERMEDIATE_OUTPUT_PATH = None
 MSBUILD_OUTPUT_PATH = None       # Build/bin
