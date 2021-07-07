@@ -5,6 +5,7 @@ import os
 import subprocess
 from registry_hijacking import set_env, get_env
 import git_hooks
+import sys
 
 MSBUILD_INTERMEDIATE_OUTPUT_PATH = None
 MSBUILD_OUTPUT_PATH = None       # Build/bin
@@ -107,8 +108,8 @@ def copy_github_hooks():
 @cli.command("git_precommit")
 def github_pre_commit():
     """Script called by git before commiting, used to validate the commit"""
-    git_hooks.precommit()
-
+    exit_code = git_hooks.precommit(PROJECT_DIRECTORY)
+    sys.exit(exit_code)
 
 
 @cli.group("kari")
