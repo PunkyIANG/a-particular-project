@@ -28,6 +28,7 @@ def set_global(name, value):
 @click.option("-project_directory", envvar="PROJECT_DIRECTORY", default=os.path.abspath("."))
 def cli(build_directory, project_directory):
     """Prepares environment and global variables"""
+    print("hello")
     set_global_and_env("MSBUILD_INTERMEDIATE_OUTPUT_PATH", os.path.join(build_directory, "obj"))
     set_global_and_env("MSBUILD_OUTPUT_PATH", os.path.join(build_directory, "bin"))
     set_global("PROJECT_DIRECTORY", project_directory)
