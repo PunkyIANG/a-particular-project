@@ -1,4 +1,3 @@
-import re
 from git import Repo
 from git.diff import Diff, DiffIndex
 import os
@@ -143,7 +142,9 @@ def precommit(project_directory):
 
     is_a_file_too_large = False
 
-    def is_file_too_large(file):
+    def is_file_too_large(file : Diff):
+        # This gives incorrect results for non-text files, which kind of defeats the purpose
+        # But not really. It works in a test repo for some reason.
         return file.a_blob.size > FILE_SIZE_LIMIT_BYTES  # 100MB
 
     for file in diff.iter_change_type('D'):
