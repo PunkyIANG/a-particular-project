@@ -54,6 +54,7 @@ def cli(build_directory, project_directory):
 def setup(skip_unity_editor_envvar):
     """Does the setup and the initial build"""
     copy_github_hooks.callback()
+    build_kari.callback(clean=False, retry=True)
     generate_code_for_unity.callback()
 
     if not skip_unity_editor_envvar:
@@ -142,9 +143,10 @@ def kari():
     pass
 
 
-@kari.command("compile")
+@kari.command("build")
 @click.option("-clean", is_flag=True, help="Whether to nuke all previous output before recompiling")
-def build_kari(clean):
+@click.option("-retry", is_flag=True, default=False, help="Whether to retry building a second time if failed")
+def build_kari(clean, retry):
     """Builds the Kari code generator"""
     # Clear all previous output
     if clean: nuke_kari.callback()
@@ -159,10 +161,14 @@ def build_kari(clean):
         publish_cmd = "dotnet publish Kari.Generator/Kari.Generator.csproj --configuration Release --no-self-contained"
         
         # dotnet fails the first time for some strange reason if the repository has just been cloned
-        try:
+        if retry:
+            try:
+                run_sync(publish_cmd)
+            except subprocess.CalledProcessError as err:
+                run_sync(publish_cmd)
+        else:
             run_sync(publish_cmd)
-        except subprocess.CalledProcessError as err:
-            run_sync(publish_cmd)
+
         
         print(f"The final dll has been written to {KARI_GENERATOR_PATH}")
         print("To run it, do `baton kari run`, passing in the flags`")
@@ -190,12 +196,12 @@ def generate_with_kari(rebuild, unprocessed_args):
     """
 
     if rebuild:
-        if not build_kari.callback(clean=False):
+        if not build_kari.callback(clean=False, retry=False):
             return False
 
     elif not os.path.exists(KARI_GENERATOR_PATH):
         print("Initiating build, since Kari has not been built")
-        if not build_kari.callback(clean=False):
+        if not build_kari.callback(clean=False, retry=False):
             return False
     
     try:
