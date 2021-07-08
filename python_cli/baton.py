@@ -153,7 +153,8 @@ def build_kari(clean):
     os.chdir(f"{PROJECT_DIRECTORY}/Kari")
 
     try:
-        # run_sync("dotnet restore")
+        run_sync("dotnet tool restore")
+        run_sync("dotnet restore")
         run_sync("dotnet publish Kari.Generator/Kari.Generator.csproj --configuration Release --no-self-contained")
         
         print(f"The final dll has been written to {KARI_GENERATOR_PATH}")
