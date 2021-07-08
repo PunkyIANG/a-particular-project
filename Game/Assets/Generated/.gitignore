@@ -1,0 +1,3 @@
+# It would be logical to generate all into a single file just to have less .meta's
+*.cs
+*.cs.meta

@@ -47,12 +47,9 @@ def precommit(project_directory):
     def is_in_assets(file : Diff) -> bool:
         return file.a_path.startswith('Game/Assets')
 
-    def should_not_be_ignored(file):
-        return is_in_assets(file) and not is_ignored_by_unity(file)
-
-    def is_meta(file : Diff) -> bool:
-        return file.a_path.endswith('.meta') \
-            and len(file.a_path) > 5  # simply '.meta' is still a valid file? 
+    def is_meta(file : str) -> bool:
+        return file.endswith('.meta') \
+            and len(file) > 5  # simply '.meta' is still a valid file? 
 
     def strip_meta(filename : str) -> str:
         return filename[:-5]
@@ -61,10 +58,45 @@ def precommit(project_directory):
         return len(collection) == 0
 
 
+    def update_tree(root, path : str):
+        parts = path.split('/')
+        current_node = root
+
+        # we just care about the assets, so skip the first one 
+        for part in parts[1:]:
+
+            # given node already among the children
+            if part in current_node:
+                current_node = current_node[part]
+                continue
+            
+            # create the new node for this part of the path
+            node = {}
+            current_node[part] = node
+            current_node = node
+
+    def is_path_in_tree(root, path : str):
+        parts = path.split('/')
+        current_node = root
+
+        # we just care about the assets, so skip the first one 
+        for part in parts[1:]:
+
+            # given node already among the children
+            if part in current_node:
+                current_node = current_node[part]
+                continue
+            
+            return False
+        
+        return True
+
+
     class IterHelper:
         def __init__(self):
             self.extra_files     : dict[str, int] = {}
             self.undeleted_files : dict[str, int] = {}
+            self.changed_folder_tree = {}
 
         def _update_with(self, dictionary, key, type):
             if key in dictionary:
@@ -74,14 +106,35 @@ def precommit(project_directory):
             else:
                 dictionary[key] = type
 
-        def update_add(self, key, type):
-            self._update_with(self.extra_files, key, type)
+        def update_add(self, path):
+            if is_meta(path):
+                stripped = strip_meta(path)
+                self._update_with(self.extra_files, stripped, META)
+                self._update_add_folder_of(os.path.dirname(stripped))
+            else:
+                self._update_with(self.extra_files, path, FILE)
+                self._update_add_folder_of(os.path.dirname(path))
 
-        def update_delete(self, key, type):
-            self._update_with(self.undeleted_files, key, type)
+        def update_delete(self, path):
+            if is_meta(path):
+                stripped = strip_meta(path)
+                self._update_with(self.undeleted_files, stripped, META)
+            else:
+                self._update_with(self.undeleted_files, path, FILE)
 
-        def is_good(self):
-            return is_empty(self.extra_files) and is_empty(self.undeleted_files)
+        def _update_add_folder_of(self, key):
+            update_tree(self.changed_folder_tree, key)
+
+        def has_added_folder_of(self, key):
+            return is_path_in_tree(self.changed_folder_tree, key)
+
+        def preupdate_and_check(self, file : Diff):
+            if is_in_assets(file):
+                if is_ignored_by_unity(file):
+                    self._update_add_folder_of(os.path.dirname(file.a_path))
+                    return False
+                return True
+            return False
 
     index = repo.index
     diff : DiffIndex = index.diff(repo.head.commit)
@@ -91,42 +144,40 @@ def precommit(project_directory):
     # which means that for new files, in order to get from the index to the latest commit we would need 
     # to remove that new file, which is why 'D' gives new files while 'A' gives deleted files.
     for file in diff.iter_change_type('D'):
-        if should_not_be_ignored(file):
-            if is_meta(file):
-                helper.update_add(strip_meta(file.a_path), META)
-            else:
-                helper.update_add(file.a_path, FILE)
+        if helper.preupdate_and_check(file):
+            helper.update_add(file.a_path)
         
     # Same thing for deleted
     for file in diff.iter_change_type('A'):
-        if should_not_be_ignored(file):
-            if is_meta(file):
-                helper.update_delete(strip_meta(file.a_path), META)
-            else:
-                helper.update_delete(file.a_path, FILE)
+        if helper.preupdate_and_check(file):
+            helper.update_delete(file.a_path)
 
     # Renaming = deleting the older one and adding a newer one
     for file in diff.iter_change_type('R'):
-        if should_not_be_ignored(file):
-            if is_meta(file):
-                helper.update_add(strip_meta(file.a_path), META)
-                helper.update_delete(strip_meta(file.b_path), META)
-            else:
-                helper.update_add(file.a_path, FILE)
-                helper.update_delete(file.b_path, FILE)
+        if helper.preupdate_and_check(file):
+            helper.update_add(file.a_path)
+            helper.update_delete(file.b_path)
+
+
+    failed_added = False
 
     # New metas and files
     for file_path, type in helper.extra_files.items():
         if type == META:
             # Check the empty directory case
             if os.path.splitext(file_path)[1] == '':
-                # TODO: create the .keep file automatically
-                print(f"Detected redundant meta potentially for an empty directory {file_path}")
-                print("To fix, create a file inside of it, like an empty '.keep' file")
+                if not helper.has_added_folder_of(file_path):
+                    # TODO: create the .keep file automatically?
+                    print(f"Detected redundant meta potentially for an empty directory {file_path}")
+                    print("To fix, create a file inside of it, like an empty '.keep' file")
+                    failed_added = True
             else:
                 print("Redundant meta: " + file_path + ".meta")
+                failed_added = True
         else:
             print("Missing meta for: " + file_path)
+            failed_added = True
+
 
     # Old metas and files
     for file_path, type in helper.undeleted_files.items():
@@ -136,7 +187,7 @@ def precommit(project_directory):
             print("Redundant meta for deleted file: " + file_path)
 
     # Fail the first check
-    if not helper.is_good():
+    if failed_added or not is_empty(helper.undeleted_files):
         print('fail: meta discrepancy')
         return META_DISCREPANCY_EXIT_CODE
 
