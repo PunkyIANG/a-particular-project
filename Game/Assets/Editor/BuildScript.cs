@@ -21,7 +21,7 @@ namespace SomeProject.EditorExtensions
 		{
 			var buildPlayerOptions = new BuildPlayerOptions();
 			buildPlayerOptions.scenes = new[] { "Assets/Scenes/SampleScene.unity" };
-			buildPlayerOptions.locationPathName = Path.Combine(BuildPath, "win64");
+			buildPlayerOptions.locationPathName = Path.Combine(BuildPath, "win64.exe");
 			buildPlayerOptions.target = BuildTarget.StandaloneWindows64;
 			buildPlayerOptions.options = BuildOptions.None;
 
