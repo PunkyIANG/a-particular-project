@@ -155,7 +155,14 @@ def build_kari(clean):
     try:
         run_sync("dotnet tool restore")
         run_sync("dotnet restore")
-        run_sync("dotnet publish Kari.Generator/Kari.Generator.csproj --configuration Release --no-self-contained")
+
+        publish_cmd = "dotnet publish Kari.Generator/Kari.Generator.csproj --configuration Release --no-self-contained"
+        
+        # dotnet fails the first time for some strange reason if the repository has just been cloned
+        try:
+            run_sync(publish_cmd)
+        except subprocess.CalledProcessError as err:
+            run_sync(publish_cmd)
         
         print(f"The final dll has been written to {KARI_GENERATOR_PATH}")
         print("To run it, do `baton kari run`, passing in the flags`")
