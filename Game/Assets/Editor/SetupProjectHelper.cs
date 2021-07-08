@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 using static SomeProject.EditorExtensions.Paths;
+
 namespace SomeProject.EditorExtensions
 {
     [InitializeOnLoad]

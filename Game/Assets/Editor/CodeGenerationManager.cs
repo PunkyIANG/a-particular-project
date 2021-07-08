@@ -9,18 +9,12 @@ using Hextant.Editor;
 
 namespace SomeProject.EditorExtensions
 {
-    [Settings(SettingsUsage.EditorUser, "Code Generation setting")]
+    [Settings(SettingsUsage.EditorUser, "Code Generation settings")]
     public sealed class CodeGenerationSettings : Settings<CodeGenerationSettings>
     {
         public bool RegenerateOnReload => _regenerateOnReload;
         [SerializeField, Tooltip("Whether to call Kari when the editor restarts")] 
         private bool _regenerateOnReload = true;
-
-        // public float floatValue => _floatValue;
-        // [SerializeField, Range( 0, 100 )] float _floatValue = 25.0f;
-
-        // public string stringValue => _stringValue;
-        // [SerializeField, Tooltip( "A string value." )] string _stringValue = "Hello";
 
         [SettingsProvider]
         static SettingsProvider GetSettingsProvider() => instance.GetSettingsProvider();
@@ -37,10 +31,8 @@ namespace SomeProject.EditorExtensions
         [MenuItem("Project Setup/Generate code via Kari")]
         private static void GenerateCode()
         {
-            var cliPath = Path.Combine(ProjectRootPath, "cli.py");
-            
             // The default working directory is Game, but I believe it, unlike the dataPath, is not stable
-            if (!RunProcess("python", $"{cliPath} kari unity", workingDirectory: ProjectRootPath))
+            if (!RunProcess("baton", "kari unity", workingDirectory: ProjectRootPath))
             {
                 UnityEngine.Debug.LogError("Code Generation failed");
             }

@@ -8,7 +8,7 @@ namespace SomeProject.EditorExtensions
         /// <summary>
         /// SomeProject/Game/Assets
         /// </summary>
-        public static readonly string AssetsFolder     = Application.dataPath;
+        public static readonly string AssetsFolder = Application.dataPath;
         /// <summary>
         /// SomeProject/Game
         /// </summary>
@@ -16,6 +16,11 @@ namespace SomeProject.EditorExtensions
         /// <summary>
         /// SomeProject
         /// </summary>
-        public static readonly string ProjectRootPath  = Path.Combine(UnityProjectPath, "..");
+        public static readonly string ProjectRootPath = Path.Combine(UnityProjectPath, "..");
+        /// <summary>
+        /// SomeProject/Build
+        /// </summary>
+        public static readonly string BuildPath = Path.Combine(ProjectRootPath, "Build");
+
     }
 }
