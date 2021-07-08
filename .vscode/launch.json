@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Kari/Kari.Generator/bin/Debug/net5.0/kari.dll",
+            "program": "${workspaceFolder}/Kari/Kari.Generator/bin/Debug/netcoreapp3.1/kari.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Kari/Kari.Generator",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
