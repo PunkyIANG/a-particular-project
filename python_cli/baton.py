@@ -91,7 +91,7 @@ def set_unity_editor_envvar(info):
     else:
         print("The current value of UNITY_EDITOR is: " + current_path)
     
-    # Here, the user would go into Unity hub and descover the path to the Unity editor
+    # Here, the user would go into Unity hub and discover the path to the Unity editor
     input_path = input("Enter the new value (just press Enter to skip): ")
 
     # If user hits Enter, we get an empty string here
@@ -190,7 +190,7 @@ def build_kari(clean, retry):
 @click.argument("unprocessed_args", nargs=-1, type=click.UNPROCESSED)
 def generate_with_kari(rebuild, unprocessed_args):
     """
-    Equivalent to calling Kari from the command line
+    Equivalent to calling Kari from the command line.
     
     "unprocessed_args" are the arguments passed to Kari. Call this command without any arguments for more info."
     """

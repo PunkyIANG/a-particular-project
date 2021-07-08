@@ -57,46 +57,11 @@ def precommit(project_directory):
     def is_empty(collection) -> bool:
         return len(collection) == 0
 
-
-    def update_tree(root, path : str):
-        parts = path.split('/')
-        current_node = root
-
-        # we just care about the assets, so skip the first one 
-        for part in parts[1:]:
-
-            # given node already among the children
-            if part in current_node:
-                current_node = current_node[part]
-                continue
-            
-            # create the new node for this part of the path
-            node = {}
-            current_node[part] = node
-            current_node = node
-
-    def is_path_in_tree(root, path : str):
-        parts = path.split('/')
-        current_node = root
-
-        # we just care about the assets, so skip the first one 
-        for part in parts[1:]:
-
-            # given node already among the children
-            if part in current_node:
-                current_node = current_node[part]
-                continue
-            
-            return False
-        
-        return True
-
-
     class IterHelper:
         def __init__(self):
             self.extra_files     : dict[str, int] = {}
             self.undeleted_files : dict[str, int] = {}
-            self.changed_folder_tree = {}
+            self.changed_folders : dict[str, bool] = {}
 
         def _update_with(self, dictionary, key, type):
             if key in dictionary:
@@ -123,10 +88,10 @@ def precommit(project_directory):
                 self._update_with(self.undeleted_files, path, FILE)
 
         def _update_add_folder_of(self, key):
-            update_tree(self.changed_folder_tree, key)
+            self.changed_folders[key] = True
 
         def has_added_folder_of(self, key):
-            return is_path_in_tree(self.changed_folder_tree, key)
+            return self.changed_folders.get(key)
 
         def preupdate_and_check(self, file : Diff):
             if is_in_assets(file):
