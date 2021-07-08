@@ -156,7 +156,7 @@ def precommit(project_directory):
     for file in diff.iter_change_type('R'):
         if helper.preupdate_and_check(file):
             helper.update_add(file.a_path)
-            helper.update_delete(file.a_path)
+            helper.update_delete(file.b_path)
 
 
     failed_added = False
