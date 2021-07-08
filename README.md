@@ -7,7 +7,7 @@
 - Git for version control via console: https://git-scm.com/
 - Git LFS for work with big files: https://git-lfs.github.com/
 - Python 3, needed to run the custom build script.
-- .NET 5 SDK, needed to compile and run the code generator.
+- .NET Core 3.1 SDK, needed to compile and run the code generator.
 
 I recommend installing both Python and .NET via Visual Studio, even if you're not planning to be using their IDE. 
 It's just going to save you some troubleshooting (I've struggled for days with bugs and inconveniences). 
@@ -15,7 +15,7 @@ Go to this link, it should start the download: https://visualstudio.microsoft.co
 When that is done, open up the installer and select the .NET and Python workloads, it should just work.
 
 
-Alternatively, here is Python https://www.python.org/downloads/, and here is .NET 5 https://dotnet.microsoft.com/download/dotnet/thank-you/sdk-5.0.301-windows-x64-installer
+Alternatively, here is Python https://www.python.org/downloads/, and here is .NET Core 3.1 https://dotnet.microsoft.com/download/dotnet/3.1
 
 ## Setup Instructions
 
@@ -41,6 +41,3 @@ If the needed version is not showing up, you have either failed to install it or
 > If running `pip` or `python` says these commands are unrecognized, you'll have to add the paths to them to your `PATH` environment variable. 
 > If you have istalled Python via Visual Studio, like I did, the path to `python` is similar to `C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64`, and the path to `pip` should be similar to `C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\Scripts`. 
 > After you're done, reload the computer and **repeat step 4**, while ignoring the final one.
-
-
-## 
