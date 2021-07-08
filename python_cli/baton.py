@@ -43,7 +43,7 @@ def cli(build_directory, project_directory):
     set_global_and_env("MSBUILD_OUTPUT_PATH", os.path.join(build_directory, "bin"))
     set_global("PROJECT_DIRECTORY", project_directory)
     set_global("GIT_SOURCE_HOOKS_PATH", os.path.join(project_directory, "git_hooks"))
-    set_global("DOT_GIT_HOOKS_PATH", os.path.join(project_directory, ".git/hooks"))
+    set_global("DOT_GIT_HOOKS_PATH", os.path.join(project_directory, ".git", "hooks"))
     set_global("KARI_GENERATOR_PATH", 
         os.path.join(MSBUILD_OUTPUT_PATH, "Kari.Generator", "Release", "net5.0", "kari.dll"))
     set_global("UNITY_PROJECT_DIRECTORY", os.path.join(project_directory, "Game"))
