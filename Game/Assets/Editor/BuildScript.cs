@@ -6,7 +6,7 @@ using System.IO;
 
 namespace SomeProject.EditorExtensions
 {
-	public class BuildPlayerExample : MonoBehaviour
+	public class BuildPlayer
 	{
 		[MenuItem("Build/Build Windows")]
 		public static void Build()
