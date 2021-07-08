@@ -65,8 +65,8 @@ def setup(skip_unity_editor_envvar):
 def update_self():
     """Recompiles and reinstalls Baton globally"""
     
-    print('Just wait a couple of seconds...')
     subprocess.Popen("pip install " + quote(os.path.join(PROJECT_DIRECTORY, "python_cli")))
+    exit('Self-Update started. Press Enter when you see "Successfully installed baton"')
 
 
 @cli.command("set_unity_editor")
