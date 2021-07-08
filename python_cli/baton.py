@@ -44,7 +44,8 @@ def cli(build_directory, project_directory):
     set_global("PROJECT_DIRECTORY", project_directory)
     set_global("GIT_SOURCE_HOOKS_PATH", os.path.join(project_directory, "git_hooks"))
     set_global("DOT_GIT_HOOKS_PATH", os.path.join(project_directory, ".git/hooks"))
-    set_global("KARI_GENERATOR_PATH", f"{MSBUILD_OUTPUT_PATH}/Kari.Generator/Release/net5.0/kari.dll")
+    set_global("KARI_GENERATOR_PATH", 
+        os.path.join(MSBUILD_OUTPUT_PATH, "Kari.Generator", "Release", "net5.0", "kari.dll"))
     set_global("UNITY_PROJECT_DIRECTORY", os.path.join(project_directory, "Game"))
     set_global("UNITY_ASSETS_DIRECTORY", os.path.join(UNITY_PROJECT_DIRECTORY, "Assets"))
 
@@ -64,7 +65,7 @@ def update_self():
     """Recompiles and reinstalls Baton globally"""
     
     print('Just wait a couple of seconds...')
-    subprocess.Popen("pip install " + quote(f"{PROJECT_DIRECTORY}/python_cli"))
+    subprocess.Popen("pip install " + quote(os.path.join(PROJECT_DIRECTORY, "python_cli")))
 
 
 @cli.command("set_unity_editor")
