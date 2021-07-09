@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Assertions;
+using static SomeProject.EditorExtensions.Paths;
 
 namespace SomeProject.EditorExtensions
 {
@@ -28,17 +28,16 @@ namespace SomeProject.EditorExtensions
         [MenuItem("Project Setup/Initialize git hooks")]
         private static void InitializeGitHooks()
         {
-            var projectPath               = Path.GetDirectoryName(Application.dataPath);
-            var gitHooksSourceControlPath = Path.Combine(projectPath, "git_hooks");
-            var gitHooksDotGitPath        = Path.Combine(projectPath, ".git", "hooks");
+            var gitHooksSourceControlPath = Path.Combine(ProjectRootPath, "git_hooks");
+            var gitHooksDotGitPath        = Path.Combine(ProjectRootPath, ".git", "hooks");
 
             foreach (var hookFilePath in Directory.GetFiles(gitHooksSourceControlPath))
             {
                 var fileName = Path.GetFileName(hookFilePath);
                 var hookFileDestinationPath = Path.Combine(gitHooksDotGitPath, fileName);
 
-                Debug.Log($"Copying {hookFilePath} to {hookFileDestinationPath}");
                 File.Copy(hookFilePath, hookFileDestinationPath, overwrite: true);
+                Debug.Log($"Copied {hookFilePath} to {hookFileDestinationPath}");
             }
         }
     }
