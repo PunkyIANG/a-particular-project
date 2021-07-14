@@ -1,3 +1,6 @@
 [submodule "Game/Packages/com.hextantstudios.utilities"]
-	path = Game/Packages/com.hextantstudios.utilities
+	path = Game/Assets/Plugins/com.hextantstudios.utilities
 	url = https://github.com/AntonC9018/com.hextantstudios.utilities
+[submodule "Game/Assets/Plugins/UnityIngameDebugConsole"]
+	path = Game/Assets/Plugins/UnityIngameDebugConsole
+	url = https://github.com/AntonC9018/UnityIngameDebugConsole
