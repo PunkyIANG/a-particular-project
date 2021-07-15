@@ -8,7 +8,6 @@
             "args": [
                 "build",
                 "${workspaceFolder}/Kari/Kari.Generator/Kari.Generator.csproj",
-                "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
