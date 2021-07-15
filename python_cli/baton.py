@@ -37,6 +37,7 @@ def set_global(name, value):
 @click.group()
 @click.option("-build_directory", envvar="BUILD_DIRECTORY", default=os.path.abspath("Build"))
 @click.option("-project_directory", envvar="PROJECT_DIRECTORY", default=os.path.abspath("."))
+# @click.option("-update", isFlag=True, help="Whether to update itself before running the command")
 def cli(build_directory, project_directory):
     """Prepares environment and global variables"""
     set_global_and_env("MSBUILD_INTERMEDIATE_OUTPUT_PATH", os.path.join(build_directory, "obj"))
@@ -151,7 +152,7 @@ def build_kari(clean, retry):
     # Clear all previous output
     if clean: nuke_kari.callback()
     
-    current_directory = os.curdir
+    current_directory = os.path.abspath(os.curdir)
     os.chdir(f"{PROJECT_DIRECTORY}/Kari")
 
     try:
