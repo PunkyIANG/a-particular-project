@@ -38,7 +38,7 @@ If the needed version is not showing up, you have either failed to install it or
 
 > If running `pip` or `python` says these commands are unrecognized, you'll have to add the paths to them to your `PATH` environment variable. 
 > If you have istalled Python via Visual Studio, like I did, the path to `python` is similar to `C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64`, and the path to `pip` should be similar to `C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\Scripts`. 
-> After you're done, reload the computer and **repeat step 3**.
+> After you're done, reload the computer and **proceed from step 3**.
 
 5. To get Unity to generate `.csproj` files for Intellisense in e.g. VS Code, open Unity Editor, hit `Edit -> Preferences -> External Tools`. Under `Generate .csproj files for` check the first 4 checkboxes. Hit `Regenerate project files`. 
 
