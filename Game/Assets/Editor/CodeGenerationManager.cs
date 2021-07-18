@@ -25,7 +25,7 @@ namespace SomeProject.EditorExtensions
     {
         /// <summary>
         /// Invokes Kari from the python CLI.
-        /// We define the actual task done is defined, by design, in the python script.
+        /// We define the actual task done, by design, in the python script.
         /// Change the Unity subcommand if you need more control.
         /// </summary>
         [MenuItem("Project Setup/Generate code via Kari")]

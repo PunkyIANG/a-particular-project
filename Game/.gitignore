@@ -22,6 +22,8 @@ Builds/
 Logs/
 Bin/
 
+UIElementsSchema/
+
 # erroneous meta files 
 library.meta
 temp.meta
