@@ -25,19 +25,26 @@ Alternatively, here is Python https://www.python.org/downloads/, and here is .NE
     > Alternatively, do `git clone https://github.com/PunkyIANG/a-particular-project --recursive` via the command line.
     > The option `--recursive` is needed to initialize the submodules.
 
-4. Initialize and run the batch script at the root of the repository, by calling `setup` via the command line. 
+3. Initialize and run the batch script at the root of the repository, by calling `setup` via the command line. 
 It will build and install **Baton**, the python CLI, build and run **Kari**, the code generator, on the Unity project and enable the `post-merge` and `pre-commit` git hooks.
    > The hooks will ensure meta files stay in sync and will alert you if you attempt to commit a >100mb file, which github will reject. 
    > It will reject the commit, allowing you to revise it to remove or reduce the size of the offending file(s). 
    > **These scripts have to be enabled individually on each computer you clone the repo to. Please ensure your teammates have enabled these as well.**
 
-3. The script will ask you to provide the path to the folder with the Unity Editor. 
+4. The script will ask you to provide the path to the folder with the Unity Editor. 
 For me it is `C:\Program Files\Unity\Editor`, for you it might be nested in a folder with the version name. 
 You may do it via `Unity Hub -> Installs -> Three dots above the required version -> Show in Explorer`. 
 If the needed version is not showing up, you have either failed to install it or installed it separately, in which case you'd have to `Locate` it.
 
-4. Reload your computer.
-
 > If running `pip` or `python` says these commands are unrecognized, you'll have to add the paths to them to your `PATH` environment variable. 
 > If you have istalled Python via Visual Studio, like I did, the path to `python` is similar to `C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64`, and the path to `pip` should be similar to `C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\Scripts`. 
-> After you're done, reload the computer and **repeat step 4**, while ignoring the final one.
+> After you're done, reload the computer and **repeat step 3**.
+
+5. To get Unity to generate `.csproj` files for Intellisense in e.g. VS Code, open Unity Editor, hit `Edit -> Preferences -> External Tools`. Under `Generate .csproj files for` check the first 4 checkboxes. Hit `Regenerate project files`. 
+
+> If Intellisense ever behaves weirdly, go to this menu and regenerate the project files.
+> It is likely going to fix the issue.
+
+6. Since the actual project root is one directory level up, that is the folder that should open when you double-click a script via the Unity Editor. To make it work this way, in the same `External Tools` window in the editor, set `External Script Editor Args` to `"$(ProjectPath)/.." -g "$(File)":$(Line):$(Column)`.
+
+> I may find a way to do the steps 5 and 6 automatically.
