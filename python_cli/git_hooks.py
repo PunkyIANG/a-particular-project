@@ -143,7 +143,7 @@ def precommit(project_directory):
             if os.path.splitext(file_path)[1] == '':
                 if not helper.has_added_folder_of(file_path):
                     # TODO: create the .keep file automatically?
-                    print(f"Detected redundant meta potentially for an empty directory {file_path}")
+                    print(f"Detected redundant meta, potentially for an empty directory {file_path}")
                     print("To fix, create a file inside of it, like an empty '.keep' file")
                     failed_added = True
             else:
