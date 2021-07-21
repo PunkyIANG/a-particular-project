@@ -1,6 +1,3 @@
 [submodule "Game/Packages/com.hextantstudios.utilities"]
 	path = Game/Packages/com.hextantstudios.utilities
 	url = https://github.com/AntonC9018/com.hextantstudios.utilities
-[submodule "Game/Packages/com.unity.ide.vscode"]
-	path = Game/Packages/com.unity.ide.vscode
-	url = https://github.com/AntonC9018/com.unity.ide.vscode
