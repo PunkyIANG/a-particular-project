@@ -1,16 +1,13 @@
 from genericpath import exists
-import click
-import shutil
-import os
-import subprocess
-import git_hooks
-import sys
+import click, shutil, os, subprocess, sys
+import baton.git_hooks as git_hooks
+from baton.solution import combine_solutions, SolutionFileError
 
 # Environment variable shenanigans only exist for windows
 import platform
 IS_WINDOWS = platform.system().lower().startswith('win')
 if IS_WINDOWS:
-    from registry_hijacking import set_env, get_env
+    from baton.registry_hijacking import set_env, get_env
     def quote(path : str) -> str:
         return '"' + path + '"'
 # Assume Linux
@@ -113,6 +110,28 @@ def set_unity_editor_envvar(info):
             print("You have entered the same value for the path")
     else:
         print("Skipped")
+
+
+@cli.command("master_sln")
+@click.option("-output_path", type=str, default=None)
+def master_sln(output_path):
+    """Generates the master sln by combining Game.sln and Kari.sln"""
+    prev_dir = os.curdir
+    os.chdir(PROJECT_DIRECTORY)
+
+    try:
+        combine_solutions(["Game/Game.sln", "Kari/Kari.sln"], output_path or "Master.sln")
+    
+    except SolutionFileError as exception:
+        print(f'Failed to read one of the solution files: {exception}')
+        return False
+
+    except Exception as exception:
+        print(f'Failed to generate the solution file: {exception}')
+        return False
+
+    os.chdir(prev_dir)
+    return True
 
 
 @cli.command("hooks")
