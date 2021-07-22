@@ -80,7 +80,7 @@ def set_unity_editor_envvar(info):
         print("UNITY_EDITOR is the path to the folder with the Unity.exe executable. On my machine, this path is C:\\Program Files\\Unity\\Editor. for you it might be nested in a folder with the version name. You may do it via `Unity Hub -> Installs -> Three dots above the required version -> Show in Explorer`. If the needed version is not showing up, you have either failed to install it or installed it separately, in which case you'd have to `Locate` it.")
 
     if not IS_WINDOWS:
-        print("This feature is unavailable for non-windows macines")
+        print("This feature is unavailable for non-windows machines")
         return
 
     current_path = get_env("UNITY_EDITOR")
@@ -121,16 +121,15 @@ def master_sln(output_path):
 
     try:
         combine_solutions(["Game/Game.sln", "Kari/Kari.sln"], output_path or "Master.sln")
-    
     except SolutionFileError as exception:
         print(f'Failed to read one of the solution files: {exception}')
         return False
-
     except Exception as exception:
         print(f'Failed to generate the solution file: {exception}')
         return False
-
-    os.chdir(prev_dir)
+    finally:
+        os.chdir(prev_dir)
+    
     return True
 
 

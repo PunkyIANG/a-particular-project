@@ -186,7 +186,6 @@ class Solution(object):
         file.write("# Visual Studio 2010\n")
 
     def write_to(self, file):
-
         self.write_header_to(file)
 
         for project in self.projects:
@@ -201,9 +200,7 @@ class Solution(object):
 
 
 def combine_solutions(inputs : 'list[str]', output : str) -> None:
-
     solutions = [Solution.read(file) for file in inputs]
-
     solution_guid = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
 
     with codecs.open(output, "wb", "utf-8-sig") as file:
