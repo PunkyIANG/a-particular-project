@@ -1,3 +1,6 @@
 [submodule "Game/Packages/com.hextantstudios.utilities"]
 	path = Game/Packages/com.hextantstudios.utilities
 	url = https://github.com/AntonC9018/com.hextantstudios.utilities
+[submodule "Game/Assets/CommandTerminal"]
+	path = Game/Assets/CommandTerminal
+	url = https://github.com/AntonC9018/command_terminal

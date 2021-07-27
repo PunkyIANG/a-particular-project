@@ -241,12 +241,14 @@ def generate_code_for_unity():
     """Generates code for the unity project """
 
     # TODO: maybe generate in a single file to minimize .meta's, which is possible
-    return generate_with_kari.callback(False, 
-        [ "-input", quote(UNITY_ASSETS_DIRECTORY), 
+    return generate_with_kari.callback(
+        rebuild=False, 
+        unprocessed_args=[ "-input", quote(UNITY_ASSETS_DIRECTORY), 
           "-output", quote(os.path.join(UNITY_ASSETS_DIRECTORY, "Generated")),
           "-outputNamespace", "SomeProject.Generated",
           "-rootNamespace", "SomeProject",
-          "-writeAttributes", "false"])
+          "-writeAttributes", "true",
+          "-clearOutputFolder", "true"])
 
 
 @kari.command("nuke")
