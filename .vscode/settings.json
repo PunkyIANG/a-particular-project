@@ -44,6 +44,8 @@
         "Assets/Obj/":true,
         "Assets/ProjectSettings/":true,
         "Assets/temp/":true,
-        "Assets/Temp/":true
+        "Assets/Temp/":true,
+        "Assets/Library/":true,
+        "Assets/library/":true
     }
 }

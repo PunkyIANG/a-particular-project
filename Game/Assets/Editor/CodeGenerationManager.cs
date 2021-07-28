@@ -24,8 +24,8 @@ namespace SomeProject.EditorExtensions
 
         static CodeGenerationManager()
         {
-            if (CodeGenerationSettings.instance.RegenerateOnReload)
-                GenerateCode();
+            // if (CodeGenerationSettings.instance.RegenerateOnReload)
+            //     GenerateCode();
         }
 
         private static void LogIfNotNullOrEmpty(string data)
