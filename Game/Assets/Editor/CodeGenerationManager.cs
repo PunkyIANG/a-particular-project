@@ -24,16 +24,20 @@ namespace SomeProject.EditorExtensions
 
         static CodeGenerationManager()
         {
-            // if (CodeGenerationSettings.instance.RegenerateOnReload)
-            //     GenerateCode();
+            // TODO: This is buggy sometimes?
+            // TODO: This is better integrated within the editor directly, like set 5 second timer 
+            //       after the programmer stopped typing, or modified a file.
+            if (CodeGenerationSettings.instance.RegenerateOnReload)
+                GenerateCode();
         }
 
         private static void LogIfNotNullOrEmpty(string data)
         {
-            if (data != null && data != string.Empty)
+            if (string.IsNullOrEmpty(data))
                 UnityEngine.Debug.Log(data);
         }
 
+        // TODO: kinda meh
         private static bool RunProcess(string processName, string args, string workingDirectory)
         {
             using (var p = new Process())
