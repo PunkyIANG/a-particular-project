@@ -236,10 +236,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21c074d86024caca2a0034ce4f53f73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PanelSettings: {fileID: 11400000, guid: 00d143b1f8c722a44b2d724084d7d4f9, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: 5e00b83768e97444bad0d087f4d960ed, type: 3}
-  m_SortingOrder: 0
 --- !u!4 &482935535
 Transform:
   m_ObjectHideFlags: 0
@@ -295,9 +291,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e2b099cddb751443a243c95be7d3340, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxHeight: 0.7
+  MaxHeight: 1
   SmallTerminalRatio: 0.33
-  ToggleSpeed: 532
+  ToggleSpeed: 2000
   ToggleHotkey: '`'
   ToggleFullHotkey: '#`'
   BufferSize: 512
