@@ -2,15 +2,12 @@
     "files.exclude":
     {
         "**/.DS_Store":true,
-        "**/.gitignore":false,
-        "**/.gitmodules":false,
         "**/*.booproj":true,
         "**/*.pidb":true,
         "**/*.suo":true,
         "**/*.user":true,
         "**/*.userprefs":true,
         "**/*.unityproj":true,
-        "**/*.dll":false,
         "**/*.exe":true,
         "**/*.pdf":true,
         "**/*.mid":true,
@@ -35,21 +32,20 @@
         "**/*.MA":true,
         "**/*.obj":true,
         "**/*.OBJ":true,
-        "**/*.asset":true,
         "**/*.cubemap":true,
         "**/*.flare":true,
         "**/*.mat":true,
         "**/*.meta":true,
         "**/*.prefab":true,
-        "**/*.unity":false,
+        "Game/*.csproj": true,
         "Assets/build/":true,
         "Assets/Build/":true,
-        "Assets/Library/":true,
-        "Assets/library/":true,
         "Assets/obj/":true,
         "Assets/Obj/":true,
         "Assets/ProjectSettings/":true,
         "Assets/temp/":true,
-        "Assets/Temp/":true
+        "Assets/Temp/":true,
+        "Assets/Library/":true,
+        "Assets/library/":true
     }
 }

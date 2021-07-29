@@ -40,9 +40,19 @@ def precommit(project_directory):
     META : int = 0
     FILE : int = 1
 
+    # Hidden Assets: https://docs.unity3d.com/Manual/SpecialFolders.html
+    # TODO: 
+    # The iteration and filtering I'm doing is awkward. 
+    # I'm sure there is a way to iterate the diff tree.
     def is_ignored_by_unity(file : Diff) -> bool:
-        first = os.path.basename(file.a_path)[0]
-        return first in ['.', '~']
+        parts = file.a_path.split('/')
+        for p in parts:
+            if len(p) < 1: continue
+            if p[0] == '.':  return True
+            if p[-1] == '~': return True
+            if p == 'cvs':   return True
+            if os.path.splitext(p)[1] == '.tmp': return True
+        return False
 
     def is_in_assets(file : Diff) -> bool:
         return file.a_path.startswith('Game/Assets')
@@ -133,7 +143,7 @@ def precommit(project_directory):
             if os.path.splitext(file_path)[1] == '':
                 if not helper.has_added_folder_of(file_path):
                     # TODO: create the .keep file automatically?
-                    print(f"Detected redundant meta potentially for an empty directory {file_path}")
+                    print(f"Detected redundant meta, potentially for an empty directory {file_path}")
                     print("To fix, create a file inside of it, like an empty '.keep' file")
                     failed_added = True
             else:

@@ -1,32 +1,16 @@
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using UnityEditor;
-using UnityEngine;
 using static SomeProject.EditorExtensions.Paths;
-using Hextant;
-using Hextant.Editor;
 
 namespace SomeProject.EditorExtensions
 {
-    [Settings(SettingsUsage.EditorUser, "Code Generation settings")]
-    public sealed class CodeGenerationSettings : Settings<CodeGenerationSettings>
-    {
-        public bool RegenerateOnReload => _regenerateOnReload;
-        [SerializeField, Tooltip("Whether to call Kari when the editor restarts")] 
-        private bool _regenerateOnReload = true;
-
-        [SettingsProvider]
-        static SettingsProvider GetSettingsProvider() => instance.GetSettingsProvider();
-    }
-
     [InitializeOnLoad]
     internal class CodeGenerationManager
     {
         /// <summary>
         /// Invokes Kari from the python CLI.
-        /// We define the actual task done is defined, by design, in the python script.
-        /// Change the Unity subcommand if you need more control.
+        /// We define the actual task done, by design, in the python script.
+        /// Change the `unity` subcommand if you need more control.
         /// </summary>
         [MenuItem("Project Setup/Generate code via Kari")]
         private static void GenerateCode()
@@ -40,16 +24,20 @@ namespace SomeProject.EditorExtensions
 
         static CodeGenerationManager()
         {
+            // TODO: This is buggy sometimes?
+            // TODO: This is better integrated within the editor directly, like set 5 second timer 
+            //       after the programmer stopped typing, or modified a file.
             if (CodeGenerationSettings.instance.RegenerateOnReload)
                 GenerateCode();
         }
 
         private static void LogIfNotNullOrEmpty(string data)
         {
-            if (data != null && data != string.Empty)
+            if (string.IsNullOrEmpty(data))
                 UnityEngine.Debug.Log(data);
         }
 
+        // TODO: kinda meh
         private static bool RunProcess(string processName, string args, string workingDirectory)
         {
             using (var p = new Process())

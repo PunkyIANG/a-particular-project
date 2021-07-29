@@ -1,16 +1,13 @@
 from genericpath import exists
-import click
-import shutil
-import os
-import subprocess
-import git_hooks
-import sys
+import click, shutil, os, subprocess, sys
+import baton.git_hooks as git_hooks
+from baton.solution import combine_solutions, SolutionFileError
 
 # Environment variable shenanigans only exist for windows
 import platform
 IS_WINDOWS = platform.system().lower().startswith('win')
 if IS_WINDOWS:
-    from registry_hijacking import set_env, get_env
+    from baton.registry_hijacking import set_env, get_env
     def quote(path : str) -> str:
         return '"' + path + '"'
 # Assume Linux
@@ -37,6 +34,7 @@ def set_global(name, value):
 @click.group()
 @click.option("-build_directory", envvar="BUILD_DIRECTORY", default=os.path.abspath("Build"))
 @click.option("-project_directory", envvar="PROJECT_DIRECTORY", default=os.path.abspath("."))
+# @click.option("-update", isFlag=True, help="Whether to update itself before running the command")
 def cli(build_directory, project_directory):
     """Prepares environment and global variables"""
     set_global_and_env("MSBUILD_INTERMEDIATE_OUTPUT_PATH", os.path.join(build_directory, "obj"))
@@ -82,7 +80,7 @@ def set_unity_editor_envvar(info):
         print("UNITY_EDITOR is the path to the folder with the Unity.exe executable. On my machine, this path is C:\\Program Files\\Unity\\Editor. for you it might be nested in a folder with the version name. You may do it via `Unity Hub -> Installs -> Three dots above the required version -> Show in Explorer`. If the needed version is not showing up, you have either failed to install it or installed it separately, in which case you'd have to `Locate` it.")
 
     if not IS_WINDOWS:
-        print("This feature is unavailable for non-windows macines")
+        print("This feature is unavailable for non-windows machines")
         return
 
     current_path = get_env("UNITY_EDITOR")
@@ -112,6 +110,27 @@ def set_unity_editor_envvar(info):
             print("You have entered the same value for the path")
     else:
         print("Skipped")
+
+
+@cli.command("master_sln")
+@click.option("-output_path", type=str, default=None)
+def master_sln(output_path):
+    """Generates the master sln by combining Game.sln and Kari.sln"""
+    prev_dir = os.curdir
+    os.chdir(PROJECT_DIRECTORY)
+
+    try:
+        combine_solutions(["Game/Game.sln", "Kari/Kari.sln"], output_path or "Master.sln")
+    except SolutionFileError as exception:
+        print(f'Failed to read one of the solution files: {exception}')
+        return False
+    except Exception as exception:
+        print(f'Failed to generate the solution file: {exception}')
+        return False
+    finally:
+        os.chdir(prev_dir)
+    
+    return True
 
 
 @cli.command("hooks")
@@ -151,7 +170,7 @@ def build_kari(clean, retry):
     # Clear all previous output
     if clean: nuke_kari.callback()
     
-    current_directory = os.curdir
+    current_directory = os.path.abspath(os.curdir)
     os.chdir(f"{PROJECT_DIRECTORY}/Kari")
 
     try:
@@ -222,9 +241,14 @@ def generate_code_for_unity():
     """Generates code for the unity project """
 
     # TODO: maybe generate in a single file to minimize .meta's, which is possible
-    return generate_with_kari.callback(False, 
-        [ "-input", quote(UNITY_ASSETS_DIRECTORY), 
-          "-output", quote(os.path.join(UNITY_ASSETS_DIRECTORY, "Generated"))])
+    return generate_with_kari.callback(
+        rebuild=False, 
+        unprocessed_args=[ "-input", quote(UNITY_ASSETS_DIRECTORY), 
+          "-output", quote(os.path.join(UNITY_ASSETS_DIRECTORY, "Generated")),
+          "-outputNamespace", "SomeProject.Generated",
+          "-rootNamespace", "SomeProject",
+          "-writeAttributes", "true",
+          "-clearOutputFolder", "true"])
 
 
 @kari.command("nuke")

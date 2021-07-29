@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Kari/Kari.Generator/bin/Debug/netcoreapp3.1/kari.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/Kari/Kari.Generator",
+            "program": "${workspaceFolder}/Build/bin/Kari.Generator/Debug/netcoreapp3.1/kari.dll",
+            "args": ["-input", "Kari/Kari.Test", "-output", "Kari/Kari.Test/Test.cs", "-rootNamespace", "Kari.Test", "-outputNamespace", "Kari.Test", "-writeAttributes", "false"],
+            "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
             "stopAtEntry": false
