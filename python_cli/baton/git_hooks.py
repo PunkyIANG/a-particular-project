@@ -8,6 +8,12 @@ FILE_TOO_LARGE_EXIT_CODE = 2
 FILE_SIZE_LIMIT_BYTES = 1024 * 1024 * 100
 
 
+def update_submodules(project_directory):
+    """Updates the submodules"""
+    repo = Repo(project_directory)
+    repo.submodule_update()
+
+
 def precommit(project_directory):
     repo = Repo(project_directory)
 

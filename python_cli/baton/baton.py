@@ -52,6 +52,7 @@ def cli(build_directory, project_directory):
 def setup(skip_unity_editor_envvar):
     """Does the setup and the initial build"""
     copy_github_hooks.callback()
+    git_hooks.update_submodules(PROJECT_DIRECTORY)    # Initialize the submodules
     build_kari.callback(clean=False, retry=True)
     generate_code_for_unity.callback()
 
@@ -90,7 +91,7 @@ def set_unity_editor_envvar(info):
         print("The current value of UNITY_EDITOR is: " + current_path)
     
     # Here, the user would go into Unity hub and discover the path to the Unity editor
-    input_path = input("Enter the new value (just press Enter to skip): ")
+    input_path = input("Enter the new value (or just press Enter to skip): ")
 
     # If user hits Enter, we get an empty string here
     if input_path != '':
