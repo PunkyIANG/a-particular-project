@@ -39,13 +39,13 @@ class GlobalSection:
         return result
 
     def write_to(self, file : codecs.StreamWriter):
-        GlobalSection.write_to(file, self.name, self.when, self.lines)
+        GlobalSection.static_write_to(file, self.name, self.when, self.lines)
         # file.write(f"\tGlobalSection({self.name}) = {self.when}\n")
         # for line in self.lines: file.write(line)
         # file.write("\tEndGlobalSection\n")
 
     @staticmethod
-    def write_to(file : codecs.StreamWriter, name, when, lines):
+    def static_write_to(file : codecs.StreamWriter, name, when, lines):
         file.write(f"\tGlobalSection({name}) = {when}\n")
         for line in lines: file.write(line)
         file.write("\tEndGlobalSection\n")
@@ -60,7 +60,8 @@ class Project:
         self.guid          : str = match[4]
         self.dependencies  = dependencies
 
-    HEADER_REGEX        = re.compile(r'Project\("\{([^\}]+)\}"\)[\s=]+"([^\"]+)",\s"(.+proj)", "(\{[^\}]+\})"')
+    
+    HEADER_REGEX        = re.compile(r'Project\("\{([^\}]+)\}"\)[\s=]+"([^\"]+)",\s"([^\"]+)", "(\{[^\}]+\})"')
     END_REGEX           = re.compile(r"""\s*EndProject""")
     END_PROJECT_SECTION = re.compile(r"""\s*EndProjectSection""")
     DEPENDENCY_REGEX    = re.compile(r"""\s*(\{[A-Za-z0-9-]+\})\s*=\s*(\{[A-Za-z0-9-]+\})""")
@@ -219,18 +220,30 @@ def combine_solutions(inputs : 'list[str]', output : str) -> None:
         project_conf_lines = []
         for solution in solutions:
             if PROJECT_CONF in solution.global_sections:
-                project_conf_lines += solution.global_sections[PROJECT_CONF].lines
+                section = solution.global_sections.pop(PROJECT_CONF)
+                project_conf_lines += section.lines
 
         SOLUTION_CONF = 'SolutionConfigurationPlatforms'
         SOLUTION_CONF_WHEN = 'preSolution'
         unique_solution_configurations = set()
         for solution in solutions:
             if SOLUTION_CONF in solution.global_sections:
-                unique_solution_configurations.update(solution.global_sections[SOLUTION_CONF].lines)
+                section = solution.global_sections.pop(SOLUTION_CONF)
+                unique_solution_configurations.update(section.lines)
 
-        GlobalSection.write_to(file, SOLUTION_CONF, SOLUTION_CONF_WHEN, unique_solution_configurations)
-        GlobalSection.write_to(file, 'SolutionProperties', 'preSolution', ['\t\tHideSolutionNode = FALSE\n'])
-        GlobalSection.write_to(file, PROJECT_CONF, PROJECT_CONF_WHEN, project_conf_lines)
+        GlobalSection.static_write_to(file, SOLUTION_CONF, SOLUTION_CONF_WHEN, unique_solution_configurations)
+        GlobalSection.static_write_to(file, 'SolutionProperties', 'preSolution', ['\t\tHideSolutionNode = FALSE\n'])
+        GlobalSection.static_write_to(file, PROJECT_CONF, PROJECT_CONF_WHEN, project_conf_lines)
+        
+        merged_others : dict[str, GlobalSection] = {}
+        for solution in solutions:
+            for key in solution.global_sections.keys():
+                if key in merged_others:
+                    merged_others[key].lines += solution.global_sections[key].lines
+                else:
+                    merged_others[key] = solution.global_sections[key]
+        for global_section in merged_others.values():
+            global_section.write_to(file)
 
         file.write("EndGlobals\n")
         
