@@ -13,6 +13,13 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "build_kari_debug",
+            "command": "baton",
+            "args": [
+                "kari", "build", "-debug" 
+            ]
+        },
+        {
             "label": "build_kari_sandbox",
             "command": "dotnet",
             "type": "process",

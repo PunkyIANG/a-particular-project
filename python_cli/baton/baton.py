@@ -43,7 +43,7 @@ def cli(build_directory, project_directory):
     set_global("GIT_SOURCE_HOOKS_PATH", os.path.join(project_directory, "git_hooks"))
     set_global("DOT_GIT_HOOKS_PATH", os.path.join(project_directory, ".git", "hooks"))
     set_global("KARI_GENERATOR_PATH", 
-        os.path.join(MSBUILD_OUTPUT_PATH, "Kari.Generator", "Release", "netcoreapp3.1", "kari.dll"))
+        os.path.join(MSBUILD_OUTPUT_PATH, "Kari.Generator", "Release", "netcoreapp3.1", "publish", "kari.exe"))
     set_global("UNITY_PROJECT_DIRECTORY", os.path.join(project_directory, "Game"))
     set_global("UNITY_ASSETS_DIRECTORY", os.path.join(UNITY_PROJECT_DIRECTORY, "Assets"))
 
@@ -166,7 +166,8 @@ def kari():
 @kari.command("build")
 @click.option("-clean", is_flag=True, help="Whether to nuke all previous output before recompiling")
 @click.option("-retry", is_flag=True, default=False, help="Whether to retry building a second time if failed")
-def build_kari(clean, retry):
+@click.option("-debug", is_flag=True, default=False, help="Whether to do a debug build")
+def build_kari(clean, retry, debug):
     """Builds the Kari code generator"""
     # Clear all previous output
     if clean: nuke_kari.callback()
@@ -178,17 +179,26 @@ def build_kari(clean, retry):
         run_sync("dotnet tool restore")
         run_sync("dotnet restore")
 
-        publish_cmd = "dotnet publish Kari.Generator/Kari.Generator.csproj --configuration Release --no-self-contained"
-        
+        configuration = "Debug" if debug else "Release"
+
+        cmds = [ 
+            f"dotnet publish Kari.Generator/Kari.Generator.csproj --configuration {configuration} --no-self-contained",
+            f"dotnet publish Kari.Plugins/Terminal/Terminal.csproj --configuration {configuration} --no-self-contained",
+            f"dotnet publish Kari.Plugins/Flags/Flags.csproj --configuration {configuration} --no-self-contained"
+        ]
         # dotnet fails the first time for some strange reason if the repository has just been cloned
         if retry:
-            try:
-                run_sync(publish_cmd)
-            except subprocess.CalledProcessError as err:
-                run_sync(publish_cmd)
+            def run_twice(cmd):
+                try:
+                    run_sync(cmd)
+                except subprocess.CalledProcessError as err:
+                    run_sync(cmd)
+            execute = run_twice
         else:
-            run_sync(publish_cmd)
+            execute = run_sync
 
+        for cmd in cmds:
+            execute(cmd)
         
         print(f"The final dll has been written to {KARI_GENERATOR_PATH}")
         print("To run it, do `baton kari run`, passing in the flags`")
@@ -226,7 +236,7 @@ def generate_with_kari(rebuild, unprocessed_args):
     
     try:
         # Pass along all of the unparsed commands
-        command = ["dotnet", quote(KARI_GENERATOR_PATH)]
+        command = [quote(KARI_GENERATOR_PATH)]
         command.extend(unprocessed_args)
         run_sync(" ".join(command))
 
@@ -244,12 +254,21 @@ def generate_code_for_unity():
     # TODO: maybe generate in a single file to minimize .meta's, which is possible
     return generate_with_kari.callback(
         rebuild=False, 
-        unprocessed_args=[ "-input", quote(UNITY_ASSETS_DIRECTORY), 
-          "-output", quote(os.path.join(UNITY_ASSETS_DIRECTORY, "Generated")),
-          "-outputNamespace", "SomeProject.Generated",
-          "-rootNamespace", "SomeProject",
-          "-writeAttributes", "true",
-          "-clearOutputFolder", "true"])
+        unprocessed_args=
+        # [   "-input", quote(UNITY_ASSETS_DIRECTORY), 
+        #     "-pluginsLocations", f"{MSBUILD_OUTPUT_PATH}/Terminal/Release/netcoreapp3.1/Kari.Plugins.Terminal.dll,${MSBUILD_OUTPUT_PATH}/Flags/Release/netcoreapp3.1/Kari.Plugins.Flags.dll",
+        #     "-generatedName", "Generated",
+        #     "-rootNamespace", "SomeProject",
+        #     "-clearOutput", "true",
+        #     "-monolithicProject", "true"]
+        [   "-input", f"{PROJECT_DIRECTORY}/Kari/Kari.Test", 
+            "-pluginsLocations", f"{MSBUILD_OUTPUT_PATH}/Terminal/Release/netcoreapp3.1/publish/Kari.Plugins.Terminal.dll,{MSBUILD_OUTPUT_PATH}/Flags/Release/netcoreapp3.1/publish/Kari.Plugins.Flags.dll",
+            "-generatedName", "Generated",
+            "-rootNamespace", "Kari",
+            "-clearOutput", "true",
+            "-monolithicProject", "true",
+            "-cleanOutput", "true"]
+        )
 
 
 @kari.command("nuke")
