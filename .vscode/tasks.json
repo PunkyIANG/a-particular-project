@@ -13,6 +13,17 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "build_kari_sandbox",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Kari/Kari.Test/Kari.Test.csproj",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "publish",
             "command": "dotnet",
             "type": "process",
