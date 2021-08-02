@@ -167,7 +167,8 @@ def kari():
 @click.option("-clean", is_flag=True, help="Whether to nuke all previous output before recompiling")
 @click.option("-retry", is_flag=True, default=False, help="Whether to retry building a second time if failed")
 @click.option("-debug", is_flag=True, default=False, help="Whether to do a debug build")
-def build_kari(clean, retry, debug):
+@click.option("-plugins", is_flag=True, default=False, help="Whether to also build all plugins")
+def build_kari(clean, retry, debug, plugins):
     """Builds the Kari code generator"""
     # Clear all previous output
     if clean: nuke_kari.callback()
@@ -181,11 +182,13 @@ def build_kari(clean, retry, debug):
 
         configuration = "Debug" if debug else "Release"
 
-        cmds = [ 
-            f"dotnet publish Kari.Generator/Kari.Generator.csproj --configuration {configuration} --no-self-contained",
-            f"dotnet publish Kari.Plugins/Terminal/Terminal.csproj --configuration {configuration} --no-self-contained",
-            f"dotnet publish Kari.Plugins/Flags/Flags.csproj --configuration {configuration} --no-self-contained"
-        ]
+        cmds = [f"dotnet publish Kari.Generator/Kari.Generator.csproj --configuration {configuration} --no-self-contained"]
+
+        if plugins:
+            cmds.extend([
+                f"dotnet publish Kari.Plugins/Terminal/Terminal.csproj --configuration {configuration} --no-self-contained",
+                f"dotnet publish Kari.Plugins/Flags/Flags.csproj --configuration {configuration} --no-self-contained"
+            ])
         # dotnet fails the first time for some strange reason if the repository has just been cloned
         if retry:
             def run_twice(cmd):
@@ -251,23 +254,25 @@ def generate_with_kari(rebuild, unprocessed_args):
 def generate_code_for_unity():
     """Generates code for the unity project """
 
+    plugin_path = MSBUILD_OUTPUT_PATH + "/{0}/Release/netcoreapp3.1/Kari.Plugins.{0}.dll"
+    plugins = ",".join([plugin_path.format(p) for p in ["Terminal", "Flags"]])
+
     # TODO: maybe generate in a single file to minimize .meta's, which is possible
     return generate_with_kari.callback(
         rebuild=False, 
         unprocessed_args=
-        # [   "-input", quote(UNITY_ASSETS_DIRECTORY), 
-        #     "-pluginsLocations", f"{MSBUILD_OUTPUT_PATH}/Terminal/Release/netcoreapp3.1/Kari.Plugins.Terminal.dll,${MSBUILD_OUTPUT_PATH}/Flags/Release/netcoreapp3.1/Kari.Plugins.Flags.dll",
+        [   "-input", quote(UNITY_ASSETS_DIRECTORY), 
+            "-pluginsLocations", quote(plugins),
+            "-generatedName", "Generated",
+            "-rootNamespace", "SomeProject",
+            "-clearOutput", "true",
+            "-monolithicProject", "false"]
+        # [   "-input", f"{PROJECT_DIRECTORY}/Kari/Kari.Test", 
+        #     "-pluginsLocations", f"{MSBUILD_OUTPUT_PATH}/Terminal/Release/netcoreapp3.1/publish/Kari.Plugins.Terminal.dll,{MSBUILD_OUTPUT_PATH}/Flags/Release/netcoreapp3.1/publish/Kari.Plugins.Flags.dll",
         #     "-generatedName", "Generated",
-        #     "-rootNamespace", "SomeProject",
+        #     "-rootNamespace", "Kari",
         #     "-clearOutput", "true",
         #     "-monolithicProject", "true"]
-        [   "-input", f"{PROJECT_DIRECTORY}/Kari/Kari.Test", 
-            "-pluginsLocations", f"{MSBUILD_OUTPUT_PATH}/Terminal/Release/netcoreapp3.1/publish/Kari.Plugins.Terminal.dll,{MSBUILD_OUTPUT_PATH}/Flags/Release/netcoreapp3.1/publish/Kari.Plugins.Flags.dll",
-            "-generatedName", "Generated",
-            "-rootNamespace", "Kari",
-            "-clearOutput", "true",
-            "-monolithicProject", "true",
-            "-cleanOutput", "true"]
         )
 
 
@@ -317,18 +322,23 @@ def copy_all_files(source_dir, dest_dir):
 def try_delete(file_path):
     shutil.rmtree(file_path, ignore_errors = True)
 
-def run_command_generator(command):
-    with subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=1, universal_newlines=True) as p:
-        for line in p.stdout:
-            yield line 
+import pty
 
-    if p.returncode != 0:
-        raise subprocess.CalledProcessError(p.returncode, command)
+def run_command_generator(command):
+    shell = sys.executable
+
+    def read(fd):
+        data = os.read(fd, 1024)
+        sys.stdout.write(data)
+        return data
+
+    ret_code = pty.spawn(shell, read)
+    
+    if ret_code != 0:
+        raise subprocess.CalledProcessError(ret_code, command)
 
 def run_command_sync(command):
-    print(command)
-    for output_line in run_command_generator(command):
-        print(output_line, end="")
+    run_command_generator(command)
 
 run_sync = run_command_sync
 

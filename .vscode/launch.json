@@ -13,12 +13,12 @@
             "program": "${workspaceFolder}/Build/bin/Kari.Generator/Debug/netcoreapp3.1/kari.exe",
             // "args": ["-input", "Kari/Kari.Test", "-output", "Kari/Kari.Test/Test.cs", "-rootNamespace", "Kari.Test", "-outputNamespace", "Kari.Test", "-writeAttributes", "false"],
             "args": [
-                "-input", "${workspaceFolder}/Kari/Kari.Test", 
+                "-input", "${workspaceFolder}/Game/Assets", 
                 "-pluginsLocations", "${workspaceFolder}/Build/bin/Terminal/Debug/netcoreapp3.1/Kari.Plugins.Terminal.dll,${workspaceFolder}/Build/bin/Flags/Debug/netcoreapp3.1/Kari.Plugins.Flags.dll",
                 "-generatedName", "Generated",
-                "-rootNamespace", "Kari",
+                "-rootNamespace", "SomeProject",
                 "-clearOutput", "true",
-                "-monolithicProject", "true"
+                "-monolithicProject", "false"
             ],
             "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
