@@ -322,23 +322,11 @@ def copy_all_files(source_dir, dest_dir):
 def try_delete(file_path):
     shutil.rmtree(file_path, ignore_errors = True)
 
-import pty
-
-def run_command_generator(command):
-    shell = sys.executable
-
-    def read(fd):
-        data = os.read(fd, 1024)
-        sys.stdout.write(data)
-        return data
-
-    ret_code = pty.spawn(shell, read)
-    
-    if ret_code != 0:
-        raise subprocess.CalledProcessError(ret_code, command)
-
 def run_command_sync(command):
-    run_command_generator(command)
+    print(command)
+    returncode = os.system(quote(command))
+    if returncode != 0:
+        raise subprocess.CalledProcessError(returncode, command)
 
 run_sync = run_command_sync
 
