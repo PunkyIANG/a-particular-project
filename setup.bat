@@ -1,5 +1,5 @@
 :: This script is necessary to set up the setupper script.
-:: All of the essential logic is contained within the CLI, see python_cli/baton.py
+:: All of the essential logic is contained within the CLI, see python_cli/baton/baton.py
 @echo off
 
 :: Make sure both python and pip are present in PATH
