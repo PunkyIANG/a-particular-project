@@ -261,10 +261,11 @@ def generate_code_for_unity():
     return generate_with_kari.callback(
         rebuild=False, 
         unprocessed_args=
-        [   "-input", quote(UNITY_ASSETS_DIRECTORY), 
+        [   "-input", os.path.join(quote(UNITY_ASSETS_DIRECTORY), "Source"), 
             "-pluginsLocations", quote(plugins),
             "-generatedName", "Generated",
             "-rootNamespace", "SomeProject",
+            "-commonNamespace", "Common",
             "-clearOutput", "true",
             "-monolithicProject", "false"]
         # [   "-input", f"{PROJECT_DIRECTORY}/Kari/Kari.Test", 
