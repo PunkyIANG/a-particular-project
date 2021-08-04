@@ -4,7 +4,7 @@ namespace SomeProject
 {
     public class Main
     {
-        [RuntimeInitializeOnLoadMethod]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void SetBuiltinCommands()
         {
             Generated.CommandsInitialization.InitializeBuiltinCommands();
