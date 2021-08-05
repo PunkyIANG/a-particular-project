@@ -2,6 +2,7 @@ from genericpath import exists
 import click, shutil, os, subprocess, sys
 import baton.git_hooks as git_hooks
 from baton.solution import combine_solutions, SolutionFileError
+from baton.logger import log, log_error, log_success, log_warning, log_info, log_reset
 
 # Environment variable shenanigans only exist for windows
 import platform
@@ -78,17 +79,17 @@ def set_unity_editor_envvar(info):
     """
 
     if info:
-        print("UNITY_EDITOR is the path to the folder with the Unity.exe executable. On my machine, this path is C:\\Program Files\\Unity\\Editor. for you it might be nested in a folder with the version name. You may do it via `Unity Hub -> Installs -> Three dots above the required version -> Show in Explorer`. If the needed version is not showing up, you have either failed to install it or installed it separately, in which case you'd have to `Locate` it.")
+        log_info("UNITY_EDITOR is the path to the folder with the Unity.exe executable. On my machine, this path is C:\\Program Files\\Unity\\Editor. for you it might be nested in a folder with the version name. You may do it via `Unity Hub -> Installs -> Three dots above the required version -> Show in Explorer`. If the needed version is not showing up, you have either failed to install it or installed it separately, in which case you'd have to `Locate` it.")
 
     if not IS_WINDOWS:
-        print("This feature is unavailable for non-windows machines")
+        log_warning("This feature is unavailable for non-windows machines")
         return
 
     current_path = get_env("UNITY_EDITOR")
     if current_path == "":
-        print("Currently, the variable UNITY_EDITOR has no value.")
+        log("Currently, the variable UNITY_EDITOR has no value.")
     else:
-        print("The current value of UNITY_EDITOR is: " + current_path)
+        log("The current value of UNITY_EDITOR is: " + current_path)
     
     # Here, the user would go into Unity hub and discover the path to the Unity editor
     input_path = input("Enter the new value (or just press Enter to skip): ")
@@ -102,15 +103,15 @@ def set_unity_editor_envvar(info):
 
         # Hopefully this check will save someone a couple of minutes of debugging
         if not os.path.exists(editor_path):
-            print(f"Warning: the path {editor_path} does not exist in the filesystem")
+            log_warning(f"The path {editor_path} does not exist in the filesystem")
         
         if current_path != editor_path:
             set_env("UNITY_EDITOR", editor_path)
-            print("UNITY_EDITOR has been set to " + editor_path)
+            log_success("UNITY_EDITOR has been set to " + editor_path)
         else:
-            print("You have entered the same value for the path")
+            log("You have entered the same value for the path")
     else:
-        print("Skipped")
+        log("Skipped")
 
 
 @cli.command("master_sln")
@@ -123,10 +124,10 @@ def master_sln(output_path):
     try:
         combine_solutions(["Game/Game.sln", "Kari/Kari.sln"], output_path or "Master.sln")
     except SolutionFileError as exception:
-        print(f'Failed to read one of the solution files: {exception}')
+        log_error(f'Failed to read one of the solution files: {exception}')
         return False
     except Exception as exception:
-        print(f'Failed to generate the solution file: {exception}')
+        log_error(f'Failed to generate the solution file: {exception}')
         return False
     finally:
         os.chdir(prev_dir)
@@ -138,7 +139,7 @@ def master_sln(output_path):
 def copy_github_hooks():
     """Copies github hooks from git_hooks"""
     copy_all_files(GIT_SOURCE_HOOKS_PATH, DOT_GIT_HOOKS_PATH)
-    print("Copied github hooks")
+    log_success("Copied github hooks")
 
 # TODO: 
 # Read docs more carefully to find out how to extend an existing group from other modules.
@@ -203,13 +204,13 @@ def build_kari(clean, retry, debug=False, plugins=True):
         for cmd in cmds:
             execute(cmd)
         
-        print(f"The final dll has been written to {KARI_GENERATOR_PATH}")
-        print("To run it, do `baton kari run`, passing in the flags`")
+        log_success(f"The final dll has been written to {KARI_GENERATOR_PATH}")
+        log_success("To run it, do `baton kari run`, passing in the flags`")
         # TODO: actually run tests
         # run_sync("dotnet run -p Kari.Test")
 
     except subprocess.CalledProcessError as err:
-        print(f"Build process exited with error code {err.returncode}")
+        log_error(f"Build process exited with error code {err.returncode}")
         return False
 
     finally:
@@ -233,7 +234,7 @@ def generate_with_kari(rebuild, unprocessed_args):
             return False
 
     elif not os.path.exists(KARI_GENERATOR_PATH):
-        print("Initiating build, since Kari has not been built")
+        log("Initiating build, since Kari has not been built")
         if not build_kari.callback(clean=False, retry=False):
             return False
     
@@ -244,7 +245,7 @@ def generate_with_kari(rebuild, unprocessed_args):
         run_sync(" ".join(command))
 
     except subprocess.CalledProcessError as err:
-        print(f"Generation failed with error code {err.returncode}")
+        log_error(f"Generation failed with error code {err.returncode}")
         return False
     
     return True
@@ -324,8 +325,9 @@ def try_delete(file_path):
     shutil.rmtree(file_path, ignore_errors = True)
 
 def run_command_sync(command):
-    print(command)
+    log(command)
     returncode = os.system(quote(command))
+    log_reset()
     if returncode != 0:
         raise subprocess.CalledProcessError(returncode, command)
 
