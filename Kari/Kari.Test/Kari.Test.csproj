@@ -4,9 +4,11 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
-  
+
   <ItemGroup>
-    <ProjectReference Include="../Kari.Shared/Kari.Shared.csproj"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.10.0" />
+    <PackageReference Include="System.CodeDom" Version="4.7.0" />
+    <ProjectReference Include="$(MSBUILD_KARI_ROOT_PATH)Kari.GeneratorCore\Kari.GeneratorCore.csproj" />
   </ItemGroup>
 
 </Project>

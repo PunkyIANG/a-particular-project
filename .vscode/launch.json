@@ -5,22 +5,41 @@
             // Use IntelliSense to find out which attributes exist for C# debugging
             // Use hover for the description of the existing attributes
             // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
-            "name": ".NET Core Launch (console)",
+            "name": "Run Kari Debug",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "build_kari_debug",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Build/bin/Kari.Generator/Debug/netcoreapp3.1/kari.dll",
-            "args": ["-input", "Kari/Kari.Test", "-output", "Kari/Kari.Test/Test.cs", "-rootNamespace", "Kari.Test", "-outputNamespace", "Kari.Test", "-writeAttributes", "false"],
+            "program": "${workspaceFolder}/Build/bin/Kari.Generator/Debug/netcoreapp3.1/kari.exe",
+            // "args": ["-input", "Kari/Kari.Test", "-output", "Kari/Kari.Test/Test.cs", "-rootNamespace", "Kari.Test", "-outputNamespace", "Kari.Test", "-writeAttributes", "false"],
+            "args": [
+                "-input", "${workspaceFolder}/Game/Assets/Source", 
+                "-pluginsLocations", "${workspaceFolder}/Build/bin/Terminal/Debug/netcoreapp3.1/Kari.Plugins.Terminal.dll,${workspaceFolder}/Build/bin/Flags/Debug/netcoreapp3.1/Kari.Plugins.Flags.dll",
+                "-generatedName", "Generated",
+                "-rootNamespace", "SomeProject",
+                "-commonName", "Common",
+                "-clearOutput", "true",
+                "-monolithicProject", "false"
+            ],
             "cwd": "${workspaceFolder}",
-            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
-            "console": "internalConsole",
+            "console": "externalTerminal",
             "stopAtEntry": false
         },
         {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"
-        }
+        },
+        {
+            "name": "Kari Sandbox",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build_kari_sandbox",
+            "program": "${workspaceFolder}/Build/bin/Kari.Test/Debug/netcoreapp3.1/Kari.Test.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "externalTerminal",
+            "stopAtEntry": false
+        },
     ]
 }

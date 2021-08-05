@@ -43,7 +43,7 @@ def cli(build_directory, project_directory):
     set_global("GIT_SOURCE_HOOKS_PATH", os.path.join(project_directory, "git_hooks"))
     set_global("DOT_GIT_HOOKS_PATH", os.path.join(project_directory, ".git", "hooks"))
     set_global("KARI_GENERATOR_PATH", 
-        os.path.join(MSBUILD_OUTPUT_PATH, "Kari.Generator", "Release", "netcoreapp3.1", "kari.dll"))
+        os.path.join(MSBUILD_OUTPUT_PATH, "Kari.Generator", "Release", "netcoreapp3.1", "publish", "kari.exe"))
     set_global("UNITY_PROJECT_DIRECTORY", os.path.join(project_directory, "Game"))
     set_global("UNITY_ASSETS_DIRECTORY", os.path.join(UNITY_PROJECT_DIRECTORY, "Assets"))
 
@@ -52,7 +52,8 @@ def cli(build_directory, project_directory):
 def setup(skip_unity_editor_envvar):
     """Does the setup and the initial build"""
     copy_github_hooks.callback()
-    build_kari.callback(clean=False, retry=True)
+    git_hooks.update_submodules(PROJECT_DIRECTORY)    # Initialize the submodules
+    build_kari.callback(clean=False, retry=True, debug=False, plugins=True)
     generate_code_for_unity.callback()
 
     if not skip_unity_editor_envvar:
@@ -90,7 +91,7 @@ def set_unity_editor_envvar(info):
         print("The current value of UNITY_EDITOR is: " + current_path)
     
     # Here, the user would go into Unity hub and discover the path to the Unity editor
-    input_path = input("Enter the new value (just press Enter to skip): ")
+    input_path = input("Enter the new value (or just press Enter to skip): ")
 
     # If user hits Enter, we get an empty string here
     if input_path != '':
@@ -165,7 +166,9 @@ def kari():
 @kari.command("build")
 @click.option("-clean", is_flag=True, help="Whether to nuke all previous output before recompiling")
 @click.option("-retry", is_flag=True, default=False, help="Whether to retry building a second time if failed")
-def build_kari(clean, retry):
+@click.option("-debug", is_flag=True, default=False, help="Whether to do a debug build")
+@click.option("-plugins", is_flag=True, default=False, help="Whether to also build all plugins")
+def build_kari(clean, retry, debug=False, plugins=True):
     """Builds the Kari code generator"""
     # Clear all previous output
     if clean: nuke_kari.callback()
@@ -177,17 +180,28 @@ def build_kari(clean, retry):
         run_sync("dotnet tool restore")
         run_sync("dotnet restore")
 
-        publish_cmd = "dotnet publish Kari.Generator/Kari.Generator.csproj --configuration Release --no-self-contained"
-        
+        configuration = "Debug" if debug else "Release"
+
+        cmds = [f"dotnet publish Kari.Generator/Kari.Generator.csproj --configuration {configuration} --no-self-contained"]
+
+        if plugins:
+            cmds.extend([
+                f"dotnet publish Kari.Plugins/Terminal/Terminal.csproj --configuration {configuration} --no-self-contained",
+                f"dotnet publish Kari.Plugins/Flags/Flags.csproj --configuration {configuration} --no-self-contained"
+            ])
         # dotnet fails the first time for some strange reason if the repository has just been cloned
         if retry:
-            try:
-                run_sync(publish_cmd)
-            except subprocess.CalledProcessError as err:
-                run_sync(publish_cmd)
+            def run_twice(cmd):
+                try:
+                    run_sync(cmd)
+                except subprocess.CalledProcessError as err:
+                    run_sync(cmd)
+            execute = run_twice
         else:
-            run_sync(publish_cmd)
+            execute = run_sync
 
+        for cmd in cmds:
+            execute(cmd)
         
         print(f"The final dll has been written to {KARI_GENERATOR_PATH}")
         print("To run it, do `baton kari run`, passing in the flags`")
@@ -225,7 +239,7 @@ def generate_with_kari(rebuild, unprocessed_args):
     
     try:
         # Pass along all of the unparsed commands
-        command = ["dotnet", quote(KARI_GENERATOR_PATH)]
+        command = [quote(KARI_GENERATOR_PATH)]
         command.extend(unprocessed_args)
         run_sync(" ".join(command))
 
@@ -240,15 +254,27 @@ def generate_with_kari(rebuild, unprocessed_args):
 def generate_code_for_unity():
     """Generates code for the unity project """
 
+    plugin_path = MSBUILD_OUTPUT_PATH + "/{0}/Release/netcoreapp3.1/Kari.Plugins.{0}.dll"
+    plugins = ",".join([plugin_path.format(p) for p in ["Terminal", "Flags"]])
+
     # TODO: maybe generate in a single file to minimize .meta's, which is possible
     return generate_with_kari.callback(
         rebuild=False, 
-        unprocessed_args=[ "-input", quote(UNITY_ASSETS_DIRECTORY), 
-          "-output", quote(os.path.join(UNITY_ASSETS_DIRECTORY, "Generated")),
-          "-outputNamespace", "SomeProject.Generated",
-          "-rootNamespace", "SomeProject",
-          "-writeAttributes", "true",
-          "-clearOutputFolder", "true"])
+        unprocessed_args=
+        [   "-input", os.path.join(quote(UNITY_ASSETS_DIRECTORY), "Source"), 
+            "-pluginsLocations", quote(plugins),
+            "-generatedName", "Generated",
+            "-rootNamespace", "SomeProject",
+            "-commonNamespace", "Common",
+            "-clearOutput", "true",
+            "-monolithicProject", "false"]
+        # [   "-input", f"{PROJECT_DIRECTORY}/Kari/Kari.Test", 
+        #     "-pluginsLocations", f"{MSBUILD_OUTPUT_PATH}/Terminal/Release/netcoreapp3.1/publish/Kari.Plugins.Terminal.dll,{MSBUILD_OUTPUT_PATH}/Flags/Release/netcoreapp3.1/publish/Kari.Plugins.Flags.dll",
+        #     "-generatedName", "Generated",
+        #     "-rootNamespace", "Kari",
+        #     "-clearOutput", "true",
+        #     "-monolithicProject", "true"]
+        )
 
 
 @kari.command("nuke")
@@ -297,18 +323,11 @@ def copy_all_files(source_dir, dest_dir):
 def try_delete(file_path):
     shutil.rmtree(file_path, ignore_errors = True)
 
-def run_command_generator(command):
-    with subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=1, universal_newlines=True) as p:
-        for line in p.stdout:
-            yield line 
-
-    if p.returncode != 0:
-        raise subprocess.CalledProcessError(p.returncode, command)
-
 def run_command_sync(command):
     print(command)
-    for output_line in run_command_generator(command):
-        print(output_line, end="")
+    returncode = os.system(quote(command))
+    if returncode != 0:
+        raise subprocess.CalledProcessError(returncode, command)
 
 run_sync = run_command_sync
 
