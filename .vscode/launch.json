@@ -41,5 +41,11 @@
             "console": "externalTerminal",
             "stopAtEntry": false
         },
+        {
+            "name": "Unity Editor",
+            "type": "unity",
+            "path": "${workspaceFolder}/Game/Library/EditorInstance.json",
+            "request": "launch"
+        }
     ]
 }
