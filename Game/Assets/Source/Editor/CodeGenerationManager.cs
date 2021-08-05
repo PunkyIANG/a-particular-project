@@ -33,7 +33,7 @@ namespace SomeProject.EditorExtensions
 
         private static void LogIfNotNullOrEmpty(string data)
         {
-            if (string.IsNullOrEmpty(data))
+            if (!string.IsNullOrEmpty(data))
                 UnityEngine.Debug.Log(data);
         }
 

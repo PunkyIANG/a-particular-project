@@ -262,7 +262,7 @@ def generate_code_for_unity():
     return generate_with_kari.callback(
         rebuild=False, 
         unprocessed_args=
-        [   "-input", os.path.join(quote(UNITY_ASSETS_DIRECTORY), "Source"), 
+        [   "-input", quote(os.path.join(UNITY_ASSETS_DIRECTORY, "Source")), 
             "-pluginsLocations", quote(plugins),
             "-generatedName", "Generated",
             "-rootNamespace", "SomeProject",
