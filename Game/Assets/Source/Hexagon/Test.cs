@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace SomeProject.Hexagon
 {
+    [ExecuteInEditMode]
     public class Test : MonoBehaviour
     {
         private static readonly float sqrt3_2 = Mathf.Sqrt(3) / 2;
