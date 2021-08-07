@@ -49,15 +49,17 @@ MonoBehaviour:
   ToggleHotkey: '`'
   ToggleFullHotkey: ^`
   BufferSize: 512
-  ConsoleFont: {fileID: 12800000, guid: 622060f47e617d64c82cc7a29dd6a8e8, type: 3}
   InputCaret: '>'
   ShowGUIButtons: 0
   RightAlignButtons: 0
-  InputContrast: 0
-  InputAlpha: 0.5
-  BackgroundColor: {r: 0, g: 0, b: 0, a: 1}
-  ForegroundColor: {r: 1, g: 1, b: 1, a: 1}
-  ShellColor: {r: 1, g: 1, b: 1, a: 1}
-  InputColor: {r: 0, g: 1, b: 1, a: 1}
-  WarningColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  ErrorColor: {r: 1, g: 0, b: 0, a: 1}
+  Theme:
+    InputContrast: 0
+    InputAlpha: 0.5
+    ConsoleFont: {fileID: 12800000, guid: 622060f47e617d64c82cc7a29dd6a8e8, type: 3}
+    BackgroundColor: {r: 0, g: 0, b: 0, a: 1}
+    ForegroundColor: {r: 1, g: 1, b: 1, a: 1}
+    ShellColor: {r: 1, g: 1, b: 1, a: 1}
+    InputColor: {r: 0, g: 1, b: 1, a: 1}
+    WarningColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+    SelectionColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 0.4745098}
+    ErrorColor: {r: 1, g: 0, b: 0, a: 1}
