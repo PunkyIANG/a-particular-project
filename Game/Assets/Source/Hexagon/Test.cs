@@ -1,3 +1,4 @@
+using EngineCommon;
 using UnityEngine;
 
 namespace SomeProject.Hexagon
@@ -40,6 +41,10 @@ namespace SomeProject.Hexagon
 
         private void Update()
         {
+            var v = new Vector3(1, 2, 3);
+            var w = v.With(x: 2);
+            v.Set(x: 5, y: 5);
+            
             transform.Rotate(new Vector3(0, 1, 0), 1.0f);
         }
     }
