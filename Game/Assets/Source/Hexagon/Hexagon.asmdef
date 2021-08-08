@@ -1,5 +1,5 @@
 {
     "name": "Hexagon",
     "rootNamespace": "SomeProject.Hexagon",
-    "references": [ "Common" ]
+    "references": [ "EngineCommon" ]
 }

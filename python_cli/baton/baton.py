@@ -163,14 +163,31 @@ def kari():
     """Has to do with code generation"""
     pass
 
+kari_plugin_names = ["Terminal", "Flags", "UnityHelpers"]
 
 @kari.command("build")
 @click.option("-clean", is_flag=True, help="Whether to nuke all previous output before recompiling")
 @click.option("-retry", is_flag=True, default=False, help="Whether to retry building a second time if failed")
 @click.option("-debug", is_flag=True, default=False, help="Whether to do a debug build")
-@click.option("-plugins", is_flag=True, default=False, help="Whether to also build all plugins")
-def build_kari(clean, retry, debug=False, plugins=True):
+@click.option("-plugin", multiple=True, default=kari_plugin_names, help="Which plugins to also build. May be any of " + str(kari_plugin_names))
+@click.option("-no_plugins", is_flag=True, help="Whether to disregard plugins")
+def build_kari(clean, retry, debug=False, plugin : 'list[str]' = None, no_plugins = False):
     """Builds the Kari code generator"""
+    
+    if no_plugins: 
+        plugin = []
+    elif plugin is None: 
+        plugin = kari_plugin_names
+    else:
+        names_set = set(kari_plugin_names)
+        error = False
+        for p in plugin:
+            if p not in names_set:
+                log_error(f"No such plugin '{p}'.")
+                error = True
+        if error:
+            return
+
     # Clear all previous output
     if clean: nuke_kari.callback()
     
@@ -182,15 +199,16 @@ def build_kari(clean, retry, debug=False, plugins=True):
         run_sync("dotnet restore")
 
         configuration = "Debug" if debug else "Release"
+        options = f" --configuration {configuration} --no-self-contained"
 
-        cmds = [f"dotnet publish Kari.Generator/Kari.Generator.csproj --configuration {configuration} --no-self-contained"]
+        cmds = [f"dotnet publish Kari.Generator/Kari.Generator.csproj{options}"]
 
-        if plugins:
-            cmds.extend([
-                f"dotnet publish Kari.Plugins/Terminal/Terminal.csproj --configuration {configuration} --no-self-contained",
-                f"dotnet publish Kari.Plugins/Flags/Flags.csproj --configuration {configuration} --no-self-contained"
-            ])
-        # dotnet fails the first time for some strange reason if the repository has just been cloned
+        for name in plugin:
+            cmds.append(f"dotnet publish Kari.Plugins/{name}/{name}.csproj{options}")
+
+        # dotnet fails the first time for some strange reason if the repository has just been cloned.
+        # Probably has to do with the templates. The sources they generate are not included in the build
+        # the first time 
         if retry:
             def run_twice(cmd):
                 try:
@@ -256,7 +274,7 @@ def generate_code_for_unity():
     """Generates code for the unity project """
 
     plugin_path = MSBUILD_OUTPUT_PATH + "/{0}/Release/netcoreapp3.1/Kari.Plugins.{0}.dll"
-    plugins = ",".join([plugin_path.format(p) for p in ["Terminal", "Flags"]])
+    plugins = ",".join([plugin_path.format(p) for p in kari_plugin_names])
 
     # TODO: maybe generate in a single file to minimize .meta's, which is possible
     return generate_with_kari.callback(
