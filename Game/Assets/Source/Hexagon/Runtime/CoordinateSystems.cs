@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace SomeProject.Hexagon
@@ -44,6 +45,29 @@ namespace SomeProject.Hexagon
                 }
             }
         }
+
+        public override int GetHashCode()
+        {
+            unchecked
+			{
+				int hash = 17;
+				hash = hash * 23 + q.GetHashCode();
+				hash = hash * 23 + r.GetHashCode();
+				return hash;
+			}
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is HexAxial axial &&
+                   r == axial.r &&
+                   q == axial.q;
+        }
+
+        public override string ToString()
+        {
+            return $"axial<{r}, {q}>";
+        }
     }
 
     public readonly struct HexCube
@@ -69,6 +93,8 @@ namespace SomeProject.Hexagon
 
         public static implicit operator HexAxial(HexCube cube) => new HexAxial(cube.r, cube.q);
 
+        public HexAxial Axial => this;
+
         public object this[int index]
         {
             get
@@ -91,19 +117,36 @@ namespace SomeProject.Hexagon
         {
             return new HexCube(a.r + b.r, a.q + b.q, a.s + b.s);
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is HexCube cube &&
+                   r == cube.r &&
+                   q == cube.q;
+        }
+
+        public override int GetHashCode()
+        {
+            return Axial.GetHashCode(); 
+        }
+
+        public override string ToString()
+        {
+            return $"cube<{r}, {q}, {s}>";
+        }
     }
 
     // TODO: this is the only part that depends on UnityEngine, so this or the coordinates should be in a separate assembly.
-    public static class HexExtensions
+    public static class HexAlgorithms
     {
         public static HexCube RotateOneSixthCounterClokwise(this HexCube cube)
         {
-            return new HexCube(-cube.r, -cube.s, -cube.q);
+            return new HexCube(-cube.q, -cube.s, -cube.r);
         }
 
         public static HexCube RotateOneSixthClokwise(this HexCube cube)
         {
-            return new HexCube(-cube.s, -cube.q, -cube.r);
+            return new HexCube(-cube.s, -cube.r, -cube.q);
         }
 
         public static HexCube RotateOneSixthCounterClokwise(this HexCube cube, HexCube around)

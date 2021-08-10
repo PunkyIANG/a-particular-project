@@ -54,7 +54,7 @@ def setup(skip_unity_editor_envvar):
     """Does the setup and the initial build"""
     copy_github_hooks.callback()
     git_hooks.update_submodules(PROJECT_DIRECTORY)    # Initialize the submodules
-    build_kari.callback(clean=False, retry=True, debug=False, plugins=True)
+    build_kari.callback(clean=False, retry=True, debug=False)
     generate_code_for_unity.callback()
 
     if not skip_unity_editor_envvar:

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace SomeProject.Hexagon
 {
     /// Maps coordinates to game objects
-    public class HexagonalWraparoundMap<T>
+    public class HexagonalWrapAroundMap<T>
     {
         public T[][] _grid;
         private HexCube[] _mirroredCenters;
@@ -35,7 +35,7 @@ namespace SomeProject.Hexagon
             _MirroredMapCenters.Add(diameter, array);
         }
 
-        public HexagonalWraparoundMap(int diameter, System.Func<HexAxial, T> instantiator)
+        public HexagonalWrapAroundMap(int diameter, System.Func<HexAxial, T> instantiator)
         {
             Initialize(diameter, instantiator);
         }
