@@ -42,7 +42,7 @@ namespace SomeProject.Hexagon
 
     }
 
-    [ExecuteInEditMode]
+    // [ExecuteInEditMode]
     public class Test : MonoBehaviour
     {
         [SerializeField] private TestParams _params = new TestParams
