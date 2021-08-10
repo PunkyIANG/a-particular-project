@@ -68,6 +68,15 @@ namespace SomeProject.Hexagon
         {
             return $"axial<{r}, {q}>";
         }
+
+        public static HexAxial operator-(HexAxial a, HexAxial b)
+        {
+            return new HexAxial(a.r - b.r, a.q - b.q);
+        }
+        public static HexAxial operator+(HexAxial a, HexAxial b)
+        {
+            return new HexAxial(a.r + b.r, a.q + b.q);
+        }
     }
 
     public readonly struct HexCube

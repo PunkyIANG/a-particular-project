@@ -1,15 +1,58 @@
 using System;
+using System.Collections.Generic;
 using EngineCommon;
 using UnityEngine;
 
 namespace SomeProject.Hexagon
 {
+    [Serializable]
+    public struct TestParams
+    {
+        public float Spacing;
+        public int MapRadius;
+        public GameObject HexPrefab;
+
+        public override bool Equals(object obj)
+        {
+            return obj is TestParams @params &&
+                   Spacing == @params.Spacing &&
+                   MapRadius == @params.MapRadius &&
+                   EqualityComparer<GameObject>.Default.Equals(HexPrefab, @params.HexPrefab);
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = -166033139;
+            hashCode = hashCode * -1521134295 + Spacing.GetHashCode();
+            hashCode = hashCode * -1521134295 + MapRadius.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<GameObject>.Default.GetHashCode(HexPrefab);
+            return hashCode;
+        }
+
+        public static bool operator==(TestParams a, TestParams b)
+        {
+            return a.Spacing == b.Spacing && a.MapRadius == b.MapRadius 
+                && a.HexPrefab == b.HexPrefab;
+        }
+
+        public static bool operator!=(TestParams a, TestParams b)
+        {
+            return !(a == b);
+        }
+
+    }
+
     // [ExecuteInEditMode]
     public class Test : MonoBehaviour
     {
-        [SerializeField] private float _spacing = 0.0f;
-        [SerializeField] private int _mapDiameter = 3;
-        [SerializeField] private GameObject _hexPrefab; 
+        [SerializeField] private TestParams _params = new TestParams
+        {
+            Spacing = 0.05f,
+            MapRadius = 2
+        }; 
+
+        private TestParams _previousParams;
+        private HexagonalWrapAroundMap<GameObject> _map;
 
         private static readonly float sqrt3 = Mathf.Sqrt(3);
         private static readonly float sqrt3_2 = Mathf.Sqrt(3) / 2.0f;
@@ -44,55 +87,44 @@ namespace SomeProject.Hexagon
             return gm;
         }
 
-        private void MakeHex(Vector2 position)
+        private GameObject MakeHex(Vector2 position)
         {
-            var obj = Instantiate(_hexPrefab, position, Quaternion.identity);
-            obj.transform.SetParent(this.transform);
+            return Instantiate(_params.HexPrefab, position, Quaternion.identity, this.transform);
         }
 
         private void Start()
         {
-            if (_hexPrefab == null)
+            _previousParams = _params;
+            if (_params.HexPrefab == null)
             {
-                _hexPrefab = GetDefaultHex();
+                _params.HexPrefab = GetDefaultHex();
             }
-            
-            int childs = transform.childCount;
-            for (int i = childs - 1; i > 0; i--)
+            Reset();
+        }
+
+        private void Reset()
+        {
+            int children = transform.childCount;
+            for (int i = children - 1; i >= 0; i--)
             {
                 GameObject.DestroyImmediate(transform.GetChild(i).gameObject);
             }
 
-            float inradius = sqrt3_2;
-            float circumradius = 1;
-            float minDiameter = inradius * 2;
-            float maxDiameter = circumradius * 2;
-            float yIncrement = (maxDiameter * 3) / 4.0f + _spacing;
-            float xIncrement = (inradius + _spacing / 2);
-            int finalRow = _mapDiameter - (_mapDiameter + 1) / 2;
-            float leftMostX = -xIncrement * finalRow;
-            Vector2 position = new Vector2(leftMostX, -finalRow * yIncrement);
+            float height = 1.0f + 2 * _params.Spacing;
 
-            for (int row = -finalRow; row <= finalRow; row++) // 1, 2, 3, 2, 1
+            var centerOffset = new HexAxial(_params.MapRadius, _params.MapRadius).ToWorldCoordinate(height);
+
+            HexagonalWrapAroundMapSharedGlobals.ReinitializeForMapSize(_params.MapRadius);
+            _map = new HexagonalWrapAroundMap<GameObject>(_params.MapRadius,
+                axial => MakeHex(axial.ToWorldCoordinate(height) - centerOffset));
+        }
+
+        private void Update()
+        {
+            if (_previousParams != _params)
             {
-                // The number of hexes on this row
-                int colCount = _mapDiameter - Math.Abs(row);
-                
-                for (int col = 0; col < colCount; col++)
-                {
-                    MakeHex(position);
-                    position.x += minDiameter + _spacing;
-                }
-                if (row < 0)
-                {
-                    leftMostX -= xIncrement;
-                }
-                else
-                {
-                    leftMostX += xIncrement;
-                }
-                position.x = leftMostX;
-                position.y += yIncrement;
+                _previousParams = _params;
+                Reset();
             }
         }
     }
