@@ -1,3 +1,4 @@
+using EngineCommon;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -51,16 +52,10 @@ namespace SomeProject.Hexagon.Tests
 
             var world = cube.Axial.ToWorldCoordinate(1.5f);
             var poleWorld = pole.Axial.ToWorldCoordinate(1.5f);
-            var worldOffset = world - poleWorld;
-            var _3dWorldOffset = new Vector3(worldOffset.x, worldOffset.y, 0);
-            var _3dWorldPole = new Vector3(0, 0, 1);
-            var rotation = Quaternion.AngleAxis(60, _3dWorldPole);
-            var _3dWorldOffsetRotated =  rotation * _3dWorldOffset;
-            var worldOffsetRotated = new Vector2(_3dWorldOffsetRotated.x, _3dWorldOffsetRotated.y);
-            var worldRotated = worldOffsetRotated + poleWorld;
-            var cubeRotatedWithExtraSteps = worldOffset.ToAxialCoordinate(1.5f);
+            var worldRotated = world.RotateAround(Mathf.PI / 3, poleWorld);
+            var cubeRotatedWithExtraSteps = worldRotated.ToAxialCoordinate(1.5f);
 
-            Assert.AreEqual(cubeRotated.Axial, cubeRotatedWithExtraSteps);
+            Assert.AreEqual(cubeRotatedWithExtraSteps, cubeRotated.Axial);
         }
     }
 }
