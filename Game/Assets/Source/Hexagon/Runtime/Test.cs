@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using EngineCommon;
+using Kari.Plugins.Terminal;
 using UnityEngine;
 
 namespace SomeProject.Hexagon
@@ -39,7 +41,12 @@ namespace SomeProject.Hexagon
         {
             return !(a == b);
         }
+    }
 
+    public static class IndicesOfThings
+    {
+        public const int TILE = 0;
+        public const int LOGIC = 1;
     }
 
     // [ExecuteInEditMode]
@@ -58,32 +65,45 @@ namespace SomeProject.Hexagon
         private static readonly float sqrt3_2 = Mathf.Sqrt(3) / 2.0f;
         private static readonly float sqrt3_4 = Mathf.Sqrt(3) / 4.0f;
 
-        private GameObject GetDefaultHex()
+        public static Mesh MakeHexMesh()
         {
-            var gm = new GameObject();
-            var filter = gm.AddComponent<MeshFilter>();
-            var renderer = gm.AddComponent<MeshRenderer>();
             var mesh = new Mesh();
             
             mesh.vertices = new Vector3[] 
             { 
+                new Vector3(sqrt3_2, 0.5f, 0),
                 new Vector3(sqrt3_2, -0.5f, 0),
                 new Vector3(0, -1.0f, 0),
                 new Vector3(-sqrt3_2, -0.5f, 0),
                 new Vector3(-sqrt3_2, 0.5f, 0),
                 new Vector3(0, 1.0f, 0),
-                new Vector3(sqrt3_2, 0.5f, 0),
             };
             mesh.triangles = new int[]
             {
-                0, 1, 5,
-                1, 4, 5,
-                1, 2, 4,
-                4, 2, 3
+                0, 1, 2,
+                2, 5, 0,
+                2, 3, 4,
+                2, 4, 5
+            };
+            mesh.normals = new Vector3[]
+            {
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, -1),
+                new Vector3(0, 0, -1),
             };
 
-            filter.mesh = mesh;
+            return mesh;
+        }
 
+        private GameObject GetDefaultHex()
+        {
+            var gm = new GameObject();
+            var filter = gm.AddComponent<MeshFilter>();
+            var renderer = gm.AddComponent<MeshRenderer>();
+            filter.mesh = MakeHexMesh();
             return gm;
         }
 
@@ -101,11 +121,18 @@ namespace SomeProject.Hexagon
             }
             Reset();
         }
+        
+        [Command]
+        public static void ChangeRadius(int radius)
+        {
+            GameObject.FindObjectOfType<Test>()._params.MapRadius = radius;
+        }
 
         private void Reset()
         {
-            int children = transform.childCount;
-            for (int i = children - 1; i >= 0; i--)
+            _previousParams = _params;
+            int childrenCount = transform.childCount;
+            for (int i = childrenCount - 1; i >= 0; i--)
             {
                 GameObject.DestroyImmediate(transform.GetChild(i).gameObject);
             }
@@ -117,13 +144,43 @@ namespace SomeProject.Hexagon
             HexagonalWrapAroundMapSharedGlobals.ReinitializeForMapSize(_params.MapRadius);
             _map = new HexagonalWrapAroundMap<GameObject>(_params.MapRadius,
                 axial => MakeHex(axial.ToWorldCoordinate(height) - centerOffset));
+            
+            // MeasureThings();
+        }
+
+        private void MeasureThings()
+        {
+            var s = Stopwatch.StartNew();
+            foreach (var m in transform.GetComponentsInChildren<MeshRenderer>())
+            {
+                m.enabled = false;
+            }
+            foreach (var m in transform.GetComponentsInChildren<MeshRenderer>())
+            {
+                m.enabled = true;
+            }
+            s.Stop();
+            UnityEngine.Debug.Log($"GetComponentsInChildren ({_map.Count}): " + s.Elapsed);
+
+            s.Reset();
+            s.Start();
+            int childrenCount = transform.childCount;
+            for (int i = childrenCount - 1; i >= 0; i--)
+            {
+                transform.GetChild(i).GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+            }
+            for (int i = childrenCount - 1; i >= 0; i--)
+            {
+                transform.GetChild(i).GetChild(0).GetComponent<MeshRenderer>().enabled = true;
+            }
+            s.Stop();
+            UnityEngine.Debug.Log($"GetChild, GetComponent ({_map.Count}): " + s.Elapsed);
         }
 
         private void Update()
         {
             if (_previousParams != _params)
             {
-                _previousParams = _params;
                 Reset();
             }
         }

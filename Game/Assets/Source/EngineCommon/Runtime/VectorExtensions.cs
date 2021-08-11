@@ -16,5 +16,15 @@ namespace EngineCommon
             var offset = vec - point;
             return Rotate(offset, radians) + point;
         }
+
+        public static Vector2 DropZ(this Vector3 vec)
+        {
+            return new Vector2(vec.x, vec.y);
+        }
+
+        public static Vector3 ZeroZ(this Vector2 vec)
+        {
+            return new Vector3(vec.x, vec.y, 0);
+        }
     }
 }
