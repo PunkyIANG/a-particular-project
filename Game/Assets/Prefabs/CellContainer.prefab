@@ -14,7 +14,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &4720331521306106684
 Transform:
@@ -42,6 +42,10 @@ PrefabInstance:
     - target: {fileID: 3216414683207624034, guid: eef91b6808da4e24ea7bbdd59561c45c, type: 3}
       propertyPath: m_Name
       value: '0: HexTile'
+      objectReference: {fileID: 0}
+    - target: {fileID: 3216414683207624034, guid: eef91b6808da4e24ea7bbdd59561c45c, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
       objectReference: {fileID: 0}
     - target: {fileID: 8431795794607983588, guid: eef91b6808da4e24ea7bbdd59561c45c, type: 3}
       propertyPath: m_RootOrder
@@ -107,7 +111,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1978113045949697098, guid: 6b2d1629188c5024f9921692a8e73f95, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.00000011920929
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1978113045949697098, guid: 6b2d1629188c5024f9921692a8e73f95, type: 3}
       propertyPath: m_LocalPosition.y
@@ -148,6 +152,10 @@ PrefabInstance:
     - target: {fileID: 9015880304914946968, guid: 6b2d1629188c5024f9921692a8e73f95, type: 3}
       propertyPath: m_Name
       value: 1. Logic
+      objectReference: {fileID: 0}
+    - target: {fileID: 9015880304914946968, guid: 6b2d1629188c5024f9921692a8e73f95, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b2d1629188c5024f9921692a8e73f95, type: 3}

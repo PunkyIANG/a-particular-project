@@ -1,21 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace SomeProject.Hexagon
 {
-    // public readonly struct HexOffset
-    // {
-    //     public readonly int x;
-    //     public readonly int y;
-
-    //     public HexOffset(int x, int y)
-    //     {
-    //         this.x = x;
-    //         this.y = y;
-    //     }
-    // }
-
     public readonly struct HexAxial
     {
         public readonly int r;
@@ -32,7 +19,7 @@ namespace SomeProject.Hexagon
 
         public HexCube Cube => this;
 
-        public object this[int index]
+        public int this[int index]
         {
             get
             { 
@@ -104,7 +91,7 @@ namespace SomeProject.Hexagon
 
         public HexAxial Axial => this;
 
-        public object this[int index]
+        public int this[int index]
         {
             get
             { 

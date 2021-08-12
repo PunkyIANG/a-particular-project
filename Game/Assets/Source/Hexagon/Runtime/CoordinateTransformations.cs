@@ -6,6 +6,7 @@ namespace SomeProject.Hexagon
     {
         public static readonly float WIDTH_HEIGTH_RATIO = Mathf.Sqrt(3) / 2; 
         public static readonly float sqrt3 = Mathf.Sqrt(3); 
+        public static readonly float one_over_sqrt3 = 1f / Mathf.Sqrt(3); 
         public static readonly float sqrt3_2 = Mathf.Sqrt(3) / 2; 
         public static readonly float sqrt3_3 = Mathf.Sqrt(3) / 3; 
 
