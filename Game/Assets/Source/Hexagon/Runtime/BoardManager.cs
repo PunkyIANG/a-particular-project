@@ -87,7 +87,7 @@ namespace SomeProject.Hexagon
         }
         
         [Command]
-        public static void ChangeRadius(int radius)
+        public static void ChangeRadius(ushort radius)
         {
             GameObject.FindObjectOfType<BoardManager>()._props.Radius = radius;
         }

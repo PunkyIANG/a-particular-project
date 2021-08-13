@@ -1,5 +1,5 @@
 {
     "name": "Hexagon",
     "rootNamespace": "SomeProject.Hexagon",
-    "references": [ "EngineCommon", "CommandTerminal" ]
+    "references": [ "EngineCommon", "Common", "CommandTerminal" ]
 }

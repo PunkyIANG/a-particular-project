@@ -14,7 +14,7 @@
             // "args": ["-input", "Kari/Kari.Test", "-output", "Kari/Kari.Test/Test.cs", "-rootNamespace", "Kari.Test", "-outputNamespace", "Kari.Test", "-writeAttributes", "false"],
             "args": [
                 "-input", "${workspaceFolder}/Game/Assets/Source", 
-                "-pluginsLocations", "${workspaceFolder}/Build/bin/Terminal/Debug/netcoreapp3.1/Kari.Plugins.Terminal.dll,${workspaceFolder}/Build/bin/Flags/Debug/netcoreapp3.1/Kari.Plugins.Flags.dll",
+                "-pluginsLocations", "${workspaceFolder}/Build/bin/Terminal/Debug/netcoreapp3.1/Kari.Plugins.Terminal.dll,${workspaceFolder}/Build/bin/Flags/Debug/netcoreapp3.1/Kari.Plugins.Flags.dll,${workspaceFolder}/Build/bin/DataObject/Debug/netcoreapp3.1/Kari.Plugins.DataObject.dll",
                 "-generatedName", "Generated",
                 "-rootNamespace", "SomeProject",
                 "-commonNamespace", "Common",

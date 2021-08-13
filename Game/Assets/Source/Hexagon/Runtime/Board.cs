@@ -48,7 +48,7 @@ namespace SomeProject.Hexagon
         public void Reset(PhysicalBoardProperties props)
         {
             Clear();
-            Map.ReInitialize(props.PanelNeckWidth, props.Radius);
+            Map.ReInitialize((int) props.PanelNeckWidth, (int) props.Radius);
             var grid = Map.Grid;
             for (int row = 0; row < grid.Length; row++)
             {
@@ -107,7 +107,7 @@ namespace SomeProject.Hexagon
 
         public HourGlassPanel MakePanel()
         {
-            var map = new HourGlassHexMap<GameObject>(_props.PanelNeckWidth, _props.Radius);
+            var map = new HourGlassHexMap<GameObject>((int) _props.PanelNeckWidth, (int) _props.Radius);
             var panelParent = new GameObject("Panel").transform;
             panelParent.SetParent(Parent);
             return new HourGlassPanel(map, panelParent);
@@ -117,7 +117,7 @@ namespace SomeProject.Hexagon
         {
             var parentGO = new GameObject(name);
             parentGO.transform.SetParent(Parent);
-            var map = new HexagonalWrapAroundMap<GameObject>(_props.Radius);
+            var map = new HexagonalWrapAroundMap<GameObject>((int) _props.Radius);
             var worldMap = new HexagonalWorldMap(map, parentGO.transform);
             return worldMap;
         }
@@ -132,7 +132,7 @@ namespace SomeProject.Hexagon
         private void ResetMap(HexagonalWorldMap worldMap)
         {
             worldMap.Clear();
-            worldMap.Map.ReInitialize(_props.Radius);
+            worldMap.Map.ReInitialize((int) _props.Radius);
             worldMap.Map.InstantiateEach(axial => worldMap.MakeHex(_props, axial));
         }
 

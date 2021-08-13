@@ -16,7 +16,7 @@
             "label": "build_kari_debug",
             "command": "baton",
             "args": [
-                "kari", "build", "-debug", "-no_plugins"
+                "kari", "build", "-debug", "-plugin", "DataObject", "-no_generator"
             ]
         },
         {

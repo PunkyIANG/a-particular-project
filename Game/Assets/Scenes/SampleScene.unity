@@ -402,6 +402,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1815905662179753108, guid: 4f0ab360b0ceb7143bb83a915985fbfe, type: 3}
+      propertyPath: _props.Radius
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 1815905662179753110, guid: 4f0ab360b0ceb7143bb83a915985fbfe, type: 3}
       propertyPath: m_Name
       value: BoardManager

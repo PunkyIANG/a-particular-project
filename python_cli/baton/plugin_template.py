@@ -16,6 +16,9 @@ namespace Kari.Plugins.{name}
         public void Initialize()
         {{
             AnalyzerMaster.Initialize(ref _analyzers);
+
+            var logger = new Logger("{name} Plugin");
+            {name}Symbols.Initialize(logger);
         }}
         
         // Called when it is time to find ("collect") the types and methods you need to analyze.
