@@ -54,6 +54,7 @@ def cli(build_directory, project_directory):
 @click.option("-skip_unity_editor_envvar", is_flag=True, default=False)
 def setup(skip_unity_editor_envvar):
     """Does the setup and the initial build"""
+    kari.callback()
     copy_github_hooks.callback()
     git_hooks.update_submodules(PROJECT_DIRECTORY)    # Initialize the submodules
     build_kari.callback(clean=False, retry=True, debug=False)
@@ -172,12 +173,12 @@ def kari():
 
 @kari.command("build")
 @click.option("-clean", is_flag=True, help="Whether to nuke all previous output before recompiling")
-@click.option("-retry", is_flag=True, default=False, help="Whether to retry building a second time if failed")
-@click.option("-debug", is_flag=True, default=False, help="Whether to do a debug build")
+@click.option("-retry", is_flag=True, help="Whether to retry building a second time if failed")
+@click.option("-debug", is_flag=True, help="Whether to do a debug build")
 @click.option("-plugin", multiple=True, default=lambda: KARI_PLUGIN_NAMES, help="Which plugins to also build. By default all plugins are built.")
 @click.option("-no_plugins", is_flag=True, help="Whether  to not rebuild any plugins")
 @click.option("-no_generator", is_flag=True, help="Whether to not rebuild the generator")
-def build_kari(clean, retry, debug=False, plugin : 'list[str]' = None, no_plugins = False, no_generator = False):
+def build_kari(clean=False, retry=False, debug=False, plugin : 'list[str]' = None, no_plugins=False, no_generator=False):
     """Builds the Kari code generator"""
 
     log_info(f"Available plugins: {KARI_PLUGIN_NAMES}")
@@ -250,7 +251,7 @@ def build_kari(clean, retry, debug=False, plugin : 'list[str]' = None, no_plugin
 @kari.command("new_plugin")
 @click.option("-name", required=True, help="The name of the plugin to be added")
 @click.option("-override", is_flag=True, help="Whether to replace the existing plugin folder and all files if the given plugin exists.")
-def new_plugin(name : str, override : bool):
+def new_plugin(name : str, override=False):
     """Creates a new plugin, adds it to Kari solution"""
 
     # Make sure the first letter is capitalized and it is a valid identifier name
@@ -265,6 +266,8 @@ def new_plugin(name : str, override : bool):
 
     try:
         run_sync(f"dotnet sln add Kari.Plugins/{name}/{name}.csproj")
+        if not build_kari.callback(retry=True, plugin=[name], no_generator=True):
+            return False
     
     except subprocess.CalledProcessError as err:
         log_error(f"A subprocess exited with error code {err.returncode}")
