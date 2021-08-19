@@ -1,1 +1,3 @@
-namespace Common{}
+namespace Common
+{
+}

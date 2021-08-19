@@ -4,14 +4,14 @@ namespace SomeProject.Hexagon.Tests
 {
     public class HexagonalWrapAroundMapTests
     {
-        private HexagonalWrapAroundMap<HexAxial> _map;
+        private HexagonalWrapAroundMap<bool> _map;
 
         [SetUp]
         public void Setup()
         {
             var radius = 1;
-            HexagonalWrapAroundMapSharedGlobals.ReinitializeForMapSize(radius);
-            _map = new HexagonalWrapAroundMap<HexAxial>(radius, a => a);
+            _map = new HexagonalWrapAroundMap<bool>(radius);
+            _map.InstantiateEach(a => true);
         }
 
         private void AssertInBounds(int r, int q)
@@ -43,7 +43,7 @@ namespace SomeProject.Hexagon.Tests
         {
             // It should just not error out.
 
-            foreach (var axial in _map)
+            foreach (var axial in _map.Coordinates)
             {
                 for (int r = -_map.Radius; r <= _map.Radius; r++)
                 {

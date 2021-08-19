@@ -10,15 +10,16 @@ namespace SomeProject.Hexagon
         public static readonly Dictionary<int, HexCube[]> _MirroredMapCenters = new Dictionary<int, HexCube[]>();
 
         // https://gamedev.stackexchange.com/a/137603
-        public static void ReinitializeForMapSize(int radius)
+        public static HexCube[] ReinitializeForMapSize(int radius)
         {
             int diameter = radius * 2 + 1;
+            HexCube[] array;
 
-            if (_MirroredMapCenters.ContainsKey(diameter))
-                return;
+            if (_MirroredMapCenters.TryGetValue(diameter, out array))
+                return array;
             
             // The origin + 6 neighboring mirror grids
-            var array = new HexCube[7];
+            array = new HexCube[7];
             array[0] = new HexCube(radius, radius);
             array[1] = new HexCube(diameter, -radius);
 
@@ -33,11 +34,13 @@ namespace SomeProject.Hexagon
             }
 
             _MirroredMapCenters.Add(diameter, array);
+
+            return array;
         }
     }
 
     /// Maps coordinates to game objects
-    public class HexagonalWrapAroundMap<T> : IEnumerable<T>
+    public class HexagonalWrapAroundMap<T> : IHexagonalHexMap<T>
     {
         public T[][] _grid;
         private HexCube[] _mirroredCenters;
@@ -46,36 +49,48 @@ namespace SomeProject.Hexagon
         public int Radius => Diameter / 2; 
         public int Count => 3 * Radius * (Radius + 1) + 1;
         public HexAxial Center => new HexAxial(Radius, Radius);
+        public bool IsInitialized => !(_grid is null);
         
-
-        public HexagonalWrapAroundMap(int radius, System.Func<HexAxial, T> instantiator = null)
+        public HexagonalWrapAroundMap()
         {
-            Initialize(radius, instantiator);
         }
 
-        public void Initialize(int radius, System.Func<HexAxial, T> instantiator = null)
+        public HexagonalWrapAroundMap(int radius)
+        {
+            Initialize(radius);
+        }
+
+        public void ReInitialize(int radius)
+        {
+            if (radius != Radius)
+            {
+                Initialize(radius);
+            }
+        }
+
+        public void Initialize(int radius)
         {
             int diameter = radius * 2 + 1;
-
-            Debug.Assert(HexagonalWrapAroundMapSharedGlobals._MirroredMapCenters.ContainsKey(diameter));
-
-            _mirroredCenters = HexagonalWrapAroundMapSharedGlobals._MirroredMapCenters[diameter];
+            
+            // Let's just forget about threads?
+            _mirroredCenters = HexagonalWrapAroundMapSharedGlobals.ReinitializeForMapSize(radius);
             _grid = new T[diameter][];
 
             for (int row = 0; row < diameter; row++)
             {
                 int rowSize = diameter - Math.Abs(radius - row);
-                var rowArray = new T[rowSize];
-                _grid[row] = rowArray;
-                
-                if (instantiator is null)
+                _grid[row] = new T[rowSize];
+            }
+        }
+        
+        public void InstantiateEach(System.Func<HexAxial, T> Instantiator)
+        {
+            for (int row = 0; row < _grid.Length; row++)
+            {
+                var rowArray = _grid[row];
+                for (int j = 0; j < rowArray.Length; j++)
                 {
-                    continue;
-                }
-
-                for (int j = 0; j < rowSize; j++)
-                {
-                    rowArray[j] = instantiator(IndicesToAxial(row, j));
+                    rowArray[j] = Instantiator(IndicesToAxial(row, j));
                 }
             }
         }
@@ -128,13 +143,35 @@ namespace SomeProject.Hexagon
         }
 
         // Left to right, top to bottom
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator<HexAxialValuePair<T>> GetEnumerator()
         {
-            for (int i = 0; i < _grid.Length; i++)
+            for (int row = 0; row < _grid.Length; row++)
+            for (int j = 0; j < _grid[row].Length; j++)
             {
-                for (int j = 0; j < _grid[i].Length; j++)
+                yield return new HexAxialValuePair<T>(IndicesToAxial(row, j), _grid[row][j]);
+            }
+        }
+
+        public IEnumerable<HexAxial> Coordinates
+        {
+            get
+            {
+                for (int row = 0; row < _grid.Length; row++)
+                for (int j = 0; j < _grid[row].Length; j++)
                 {
-                    yield return _grid[i][j];
+                    yield return IndicesToAxial(row, j);
+                }
+            }
+        }
+
+        public IEnumerable<T> Values
+        {
+            get
+            {
+                for (int row = 0; row < _grid.Length; row++)
+                for (int j = 0; j < _grid[row].Length; j++)
+                {
+                    yield return _grid[row][j];
                 }
             }
         }
