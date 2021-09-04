@@ -18,8 +18,7 @@
                 "-generatedName", "Generated",
                 "-rootNamespace", "SomeProject",
                 "-commonNamespace", "Common",
-                "-clearOutput", "true",
-                "-monolithicProject", "false"
+                "-clearOutput",
             ],
             "cwd": "${workspaceFolder}",
             "console": "externalTerminal",

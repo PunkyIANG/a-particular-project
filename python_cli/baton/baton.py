@@ -234,8 +234,9 @@ def build_kari(clean=False, retry=False, debug=False, plugin : 'list[str]' = Non
         for cmd in cmds:
             execute(cmd)
         
-        log_success(f"The final dll has been written to {KARI_GENERATOR_PATH}")
-        log_success("To run it, do `baton kari run`, passing in the flags`")
+        log_success(f"Path to Kari: {KARI_GENERATOR_PATH}")
+        log_success("To run it, do `baton kari run`, passing in the flags")
+
         # TODO: actually run tests
         # run_sync("dotnet run -p Kari.Test")
 
@@ -324,15 +325,10 @@ def generate_code_for_unity():
             "-generatedName", "Generated",
             "-rootNamespace", "SomeProject",
             "-commonNamespace", "Common",
-            "-clearOutput", "true",
-            "-monolithicProject", "false"]
-        # [   "-input", f"{PROJECT_DIRECTORY}/Kari/Kari.Test", 
-        #     "-pluginsLocations", f"{MSBUILD_OUTPUT_PATH}/Terminal/Release/netcoreapp3.1/publish/Kari.Plugins.Terminal.dll,{MSBUILD_OUTPUT_PATH}/Flags/Release/netcoreapp3.1/publish/Kari.Plugins.Flags.dll",
-        #     "-generatedName", "Generated",
-        #     "-rootNamespace", "Kari",
-        #     "-clearOutput", "true",
-        #     "-monolithicProject", "true"]
-        )
+            "-clearOutput",
+            "-terminalProject", "CommandTerminal",
+            "-engineCommon", "EngineCommon"
+        ])
 
 
 @kari.command("nuke")
