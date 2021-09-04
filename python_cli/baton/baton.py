@@ -324,15 +324,10 @@ def generate_code_for_unity():
             "-generatedName", "Generated",
             "-rootNamespace", "SomeProject",
             "-commonNamespace", "Common",
-            "-clearOutput", "true",
-            "-monolithicProject", "false"]
-        # [   "-input", f"{PROJECT_DIRECTORY}/Kari/Kari.Test", 
-        #     "-pluginsLocations", f"{MSBUILD_OUTPUT_PATH}/Terminal/Release/netcoreapp3.1/publish/Kari.Plugins.Terminal.dll,{MSBUILD_OUTPUT_PATH}/Flags/Release/netcoreapp3.1/publish/Kari.Plugins.Flags.dll",
-        #     "-generatedName", "Generated",
-        #     "-rootNamespace", "Kari",
-        #     "-clearOutput", "true",
-        #     "-monolithicProject", "true"]
-        )
+            "-clearOutput",
+            "-terminalProject", "CommandTerminal",
+            "-engineCommon", "EngineCommon"
+        ])
 
 
 @kari.command("nuke")
