@@ -234,8 +234,9 @@ def build_kari(clean=False, retry=False, debug=False, plugin : 'list[str]' = Non
         for cmd in cmds:
             execute(cmd)
         
-        log_success(f"The final dll has been written to {KARI_GENERATOR_PATH}")
-        log_success("To run it, do `baton kari run`, passing in the flags`")
+        log_success(f"Path to Kari: {KARI_GENERATOR_PATH}")
+        log_success("To run it, do `baton kari run`, passing in the flags")
+
         # TODO: actually run tests
         # run_sync("dotnet run -p Kari.Test")
 
