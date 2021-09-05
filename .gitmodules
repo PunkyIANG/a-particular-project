@@ -4,3 +4,6 @@
 [submodule "Game/Assets/CommandTerminal"]
 	path = Game/Assets/Source/CommandTerminal
 	url = https://github.com/AntonC9018/command_terminal
+[submodule "Kari"]
+	path = Kari
+	url = https://github.com/AntonC9018/Kari

@@ -26,7 +26,8 @@ PROJECT_DIRECTORY = None         # /
 UNITY_PROJECT_DIRECTORY = None   # /Game
 UNITY_ASSETS_DIRECTORY = None    # /Game/Assets
 KARI_PROJECT_PATH = None         # /Kari
-KARI_PLUGINS_PATH = None         # /Kari/Kari.Plugins
+KARI_SOURCE_PATH = None          # /Kari/source
+KARI_PLUGINS_PATH = None         # /Kari/source/Kari.Plugins
 
 def set_global_and_env(name, value):
     globals()[name] = value
@@ -166,7 +167,8 @@ KARI_PLUGIN_NAMES = None
 def kari():
     """Has to do with code generation"""
     set_global("KARI_PROJECT_PATH", os.path.join(PROJECT_DIRECTORY, "Kari"))
-    set_global("KARI_PLUGINS_PATH", os.path.join(KARI_PROJECT_PATH, "Kari.Plugins"))
+    set_global("KARI_SOURCE_PATH", os.path.join(KARI_PROJECT_PATH, "source"))
+    set_global("KARI_PLUGINS_PATH", os.path.join(KARI_SOURCE_PATH, "Kari.Plugins"))
     set_global("KARI_GENERATOR_PATH", os.path.join(MSBUILD_OUTPUT_PATH, "Kari.Generator", "Release", "netcoreapp3.1", "publish", "kari.exe"))
     set_global("KARI_PLUGIN_NAMES", [directory for directory in os.listdir(KARI_PLUGINS_PATH) 
         if os.path.isdir(os.path.join(KARI_PLUGINS_PATH, directory))])
@@ -201,11 +203,14 @@ def build_kari(clean=False, retry=False, debug=False, plugin : 'list[str]' = Non
     if clean: nuke_kari.callback()
     
     current_directory = os.path.abspath(os.curdir)
-    os.chdir(KARI_PROJECT_PATH)
 
     try:
+        os.chdir(KARI_PROJECT_PATH)
+
         run_sync("dotnet tool restore")
         run_sync("dotnet restore")
+
+        os.chdir(KARI_SOURCE_PATH)
 
         configuration = "Debug" if debug else "Release"
         options = f" --configuration {configuration} --no-self-contained"

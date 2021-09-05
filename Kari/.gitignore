@@ -1,5 +1,0 @@
-.nuget
-destination
-bin
-obj
-*.Generated.cs
